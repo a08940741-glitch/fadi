@@ -67,11 +67,11 @@
   document.addEventListener('click', e => {
     const tab = e.target.closest('[data-tab]');
     if (tab && !tab.disabled) { e.preventDefault(); show(tab.dataset.tab); }
-    if (e.target.closest('[data-start]')) { if (state.user && state.user.profile.complete) analyse(); else startWizard(); }
+    if (e.target.closest('[data-start]')) { if (state.user && state.user.profile.complete) analyse(); else if (state.draft) show('onboard'); else startWizard(); }
   });
   $('#brandLink').addEventListener('click', e => {
     e.preventDefault();
-    if (!state.user && state.screen !== 'onboard') show('home');
+    if (!state.user) show('home');   // the logo opens the info page
     else if (state.rec) show('card');
     else show('onboard');
   });
@@ -859,7 +859,8 @@
   // ---------- start ----------
   applyLang(state.lang);
   (async () => {
-    if (state.user && state.user.profile.complete) analyse(); else show('home');
+    // no sign-up: a new visitor lands straight on the farm questionnaire
+    if (state.user && state.user.profile.complete) analyse(); else startWizard();
   })();
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();

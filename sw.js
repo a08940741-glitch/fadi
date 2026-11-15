@@ -1,6 +1,6 @@
 // DAWRA service worker: offline app shell (network-first, cache fallback)
 // Account data (/api/*) and NASA calls are never cached here.
-const CACHE = 'dawra-v6';
+const CACHE = 'dawra-v7';
 const SHELL = ['./', 'index.html', 'css/style.css', 'js/i18n.js', 'js/i18n-farmer.js', 'js/i18n-ui.js', 'js/crops.js', 'js/regions.js', 'js/nasa.js', 'js/engine.js', 'js/app.js', 'icons/icon.svg', 'manifest.json'];
 
 self.addEventListener('install', e => {
