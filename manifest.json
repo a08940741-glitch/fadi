@@ -1,0 +1,9 @@
+{
+  "name": "DAWRA دورة – NASA data for Moroccan farms",
+  "short_name": "DAWRA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f1e3",
+  "theme_color": "#2f6b3a",
+  "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "dawra",
+  "version": "1.0.0",
+  "description": "DAWRA – crop rotation platform for farmers (NASA Space Apps 2026, Beni Mellal)",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

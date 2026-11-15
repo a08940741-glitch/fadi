@@ -1,0 +1,66 @@
+// DAWRA — translations for the interactive dashboard (health gauge, calendar, simulator, rotation builder)
+(function () {
+  const add = {
+    ar: {
+      'tab.build': 'صاوب الدورة ديالك',
+      'health.title': 'صحة الحقل', 'health.counts': '{r} خطر · {a} رد البال · {g} مزيان',
+      'health.bad': 'الحقل محتاج تبديل فالدورة', 'health.mid': 'الحقل مقبول ولكن خاص الانتباه', 'health.good': 'الحقل فحالة مزيانة',
+      'ind.tap': 'ضغط على أي مؤشر باش تشوف التفاصيل.',
+      'cal.tap': 'ضغط على أي شهر باش تعرف شنو كيوقع فيه.',
+      'cal.d.crop': '{m}: {c} فالحقل، الحالة عادية.', 'cal.d.bare': '{m}: الأرض عريانة، ما كاين حتى زرع.', 'cal.d.stress': '{m}: {c} فخطر بسبب {why}.',
+      'why.w.heat': 'الحرارة (الشركي)', 'why.w.frost': 'الجريحة', 'why.w.dry': 'نقص الما',
+      'sim.title': 'جرب: واش لو…؟', 'sim.sub': 'حرك الأزرار وشوف كيفاش كتبدل الاقتراحات فالحين.',
+      'sim.water': 'الما اللي عندك (م³/هكتار/عام)', 'sim.rain': 'الشتا هاد العام', 'sim.heat': 'زيادة الحرارة',
+      'sim.reset': 'رجع للأصل', 'sim.active': '⚙️ سيناريو مفعل: النتائج كتمثل "واش لو"، ماشي الحالة الحقيقية.',
+      'sim.dry': 'عام ناشف', 'sim.normal': 'عادي', 'sim.wet': 'عام فيه الشتا',
+      'build.title': 'صاوب الدورة ديالك', 'build.sub': 'اختار شنو بغيتي تزرع فكل عام، وشوف النقطة والمخاطر فالحين.',
+      'build.summer': '+ صيف', 'build.vsCur': '{d} نقطة على الدورة الحالية', 'build.vsBest': 'أحسن اقتراح عندنا: {b}/100',
+      'build.wRepeat': 'نفس العائلة عامين متتابعين: الأمراض غادي تكثر.', 'build.wNoLeg': 'ما كاينش بقوليات: التربة ما غادي تربح آزوت.',
+      'build.wWater': 'الما اللي عندك ما كافيش لهاد الدورة.', 'build.wBeet': 'الشمندر أكثر من مرة فـ 3 سنين: خطر النيماتود.', 'build.wFallow': 'الجاشير كيخلي الأرض عريانة وبلا دخل.',
+      'build.ok': '👍 دورة متوازنة!', 'build.details': 'شوف التفاصيل', 'build.useBest': 'جيب أحسن اقتراح', 'build.custom': 'الدورة ديالك',
+      'det.pick': 'اختار الدورة:', 'det.open': 'ضغط باش تحل',
+      'sum.short': '{a} هكتار · {s}'
+    },
+    fr: {
+      'tab.build': 'Ma rotation',
+      'health.title': 'Santé du champ', 'health.counts': '{r} risques · {a} à surveiller · {g} bons',
+      'health.bad': 'Le champ a besoin d’une nouvelle rotation', 'health.mid': 'Champ correct mais à surveiller', 'health.good': 'Le champ est en bon état',
+      'ind.tap': 'Touchez un indicateur pour voir le détail.',
+      'cal.tap': 'Touchez un mois pour savoir ce qui s’y passe.',
+      'cal.d.crop': '{m} : {c} au champ, situation normale.', 'cal.d.bare': '{m} : sol nu, aucune culture.', 'cal.d.stress': '{m} : {c} en danger à cause de {why}.',
+      'why.w.heat': 'la chaleur (chergui)', 'why.w.frost': 'le gel', 'why.w.dry': 'le manque d’eau',
+      'sim.title': 'Et si… ?', 'sim.sub': 'Bougez les curseurs et voyez les propositions changer en direct.',
+      'sim.water': 'Votre eau (m³/ha/an)', 'sim.rain': 'Pluie de l’année', 'sim.heat': 'Hausse de chaleur',
+      'sim.reset': 'Réinitialiser', 'sim.active': '⚙️ Scénario actif : résultats « et si », pas la situation réelle.',
+      'sim.dry': 'Année sèche', 'sim.normal': 'Normale', 'sim.wet': 'Année humide',
+      'build.title': 'Construisez votre rotation', 'build.sub': 'Choisissez la culture de chaque année et voyez le score et les risques en direct.',
+      'build.summer': '+ été', 'build.vsCur': '{d} points vs la rotation actuelle', 'build.vsBest': 'Notre meilleure proposition : {b}/100',
+      'build.wRepeat': 'Même famille deux ans de suite : plus de maladies.', 'build.wNoLeg': 'Aucune légumineuse : le sol ne gagne pas d’azote.',
+      'build.wWater': 'Votre eau ne suffit pas pour cette rotation.', 'build.wBeet': 'Betterave plus d’une fois en 3 ans : risque de nématodes.', 'build.wFallow': 'La jachère laisse le sol nu et sans revenu.',
+      'build.ok': '👍 Rotation équilibrée !', 'build.details': 'Voir le détail', 'build.useBest': 'Charger la meilleure', 'build.custom': 'Votre rotation',
+      'det.pick': 'Choisir la rotation :', 'det.open': 'Touchez pour ouvrir',
+      'sum.short': '{a} ha · {s}'
+    },
+    en: {
+      'tab.build': 'Build my rotation',
+      'health.title': 'Field health', 'health.counts': '{r} risks · {a} to watch · {g} good',
+      'health.bad': 'The field needs a new rotation', 'health.mid': 'The field is OK but needs attention', 'health.good': 'The field is in good shape',
+      'ind.tap': 'Tap any indicator to see details.',
+      'cal.tap': 'Tap any month to see what happens.',
+      'cal.d.crop': '{m}: {c} in the field, normal conditions.', 'cal.d.bare': '{m}: bare soil, no crop.', 'cal.d.stress': '{m}: {c} at risk because of {why}.',
+      'why.w.heat': 'heat (chergui)', 'why.w.frost': 'frost', 'why.w.dry': 'water shortage',
+      'sim.title': 'What if…?', 'sim.sub': 'Move the sliders and watch the suggestions change live.',
+      'sim.water': 'Your water (m³/ha/yr)', 'sim.rain': 'This year’s rain', 'sim.heat': 'Extra heat',
+      'sim.reset': 'Reset', 'sim.active': '⚙️ Scenario active: these are “what if” results, not the real situation.',
+      'sim.dry': 'Dry year', 'sim.normal': 'Normal', 'sim.wet': 'Wet year',
+      'build.title': 'Build your rotation', 'build.sub': 'Choose what to grow each year and see the score and risks live.',
+      'build.summer': '+ summer', 'build.vsCur': '{d} points vs your current rotation', 'build.vsBest': 'Our best suggestion: {b}/100',
+      'build.wRepeat': 'Same family two years in a row: more diseases.', 'build.wNoLeg': 'No legume: the soil gains no nitrogen.',
+      'build.wWater': 'Your water is not enough for this rotation.', 'build.wBeet': 'Sugar beet more than once in 3 years: nematode risk.', 'build.wFallow': 'Fallow leaves the soil bare with no income.',
+      'build.ok': '👍 Balanced rotation!', 'build.details': 'See details', 'build.useBest': 'Load the best one', 'build.custom': 'Your rotation',
+      'det.pick': 'Choose rotation:', 'det.open': 'Tap to open',
+      'sum.short': '{a} ha · {s}'
+    }
+  };
+  Object.keys(add).forEach(l => Object.assign(window.I18N[l], add[l]));
+})();

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2f6b3a">
+  <meta name="description" content="DAWRA – crop rotation advice for Moroccan farmers using NASA Earth observations. NASA Space Apps 2026, Beni Mellal.">
+  <title>DAWRA دورة – منصة الفلاح</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" id="brandLink" aria-label="DAWRA">
+      <img src="icons/icon.svg" alt="" width="40" height="40">
+      <span><b>DAWRA <span class="ar-name">دورة</span></b><small data-i18n="brand.sub"></small></span>
+    </a>
+    <div class="top-actions">
+      <span class="who" id="whoBox" hidden>👤 <b id="whoName"></b></span>
+      <label class="switch advisor-switch" id="advisorSwitch" hidden title="Advisor mode">
+        <input type="checkbox" id="advisorToggle">
+        <span class="slider"></span>
+        <span data-i18n="nav.advisor"></span>
+      </label>
+      <div class="langs" role="group" aria-label="Language">
+        <button data-lang="ar">ع</button>
+        <button data-lang="fr">FR</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- wizard progress (profile) -->
+  <nav class="stepper" id="wizSteps" hidden>
+    <button data-wz="0"><i>1</i><span data-i18n="wz.1"></span></button>
+    <button data-wz="1"><i>2</i><span data-i18n="wz.2"></span></button>
+    <button data-wz="2"><i>3</i><span data-i18n="wz.3"></span></button>
+    <button data-wz="3"><i>4</i><span data-i18n="wz.4"></span></button>
+    <button data-wz="4"><i>5</i><span data-i18n="wz.5"></span></button>
+  </nav>
+
+  <!-- dashboard tabs -->
+  <nav class="stepper tabs" id="dashTabs" hidden>
+    <button data-tab="card">🛰️ <span data-i18n="tab.card"></span></button>
+    <button data-tab="compare">🔁 <span data-i18n="tab.compare"></span></button>
+    <button data-tab="build">🧩 <span data-i18n="tab.build"></span></button>
+    <button data-tab="detail">💡 <span data-i18n="tab.detail"></span></button>
+    <button data-tab="profile">👤 <span data-i18n="tab.profile"></span></button>
+  </nav>
+
+  <main>
+    <!-- HOME -->
+    <section id="s-home" class="screen">
+      <div class="hero">
+        <div class="hero-text">
+          <span class="pill">🛰️ NASA Space Apps 2026 · Beni Mellal</span>
+          <h1 data-i18n="home.title"></h1>
+          <p class="lead" data-i18n="home.lead"></p>
+          <div class="row wrap">
+            <button class="btn primary big" data-auth="register" data-i18n="auth.registerCta"></button>
+            <button class="btn ghost big" data-auth="login" data-i18n="auth.loginCta"></button>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit"><span class="sat">🛰️</span></div>
+          <div class="earth">🌍</div>
+          <div class="field-strip"><i class="g"></i><i class="g"></i><i class="b"></i><i class="g"></i><i class="r"></i><i class="g"></i></div>
+        </div>
+      </div>
+      <div class="card why">
+        <h3 data-i18n="home.why.t"></h3>
+        <p data-i18n="home.why.d"></p>
+      </div>
+      <h2 class="center" data-i18n="home.how"></h2>
+      <div class="grid3">
+        <div class="card how"><span class="emo">📱</span><h3 data-i18n="home.h1.t"></h3><p data-i18n="home.h1.d"></p></div>
+        <div class="card how"><span class="emo">📝</span><h3 data-i18n="home.h2.t"></h3><p data-i18n="home.h2.d"></p></div>
+        <div class="card how"><span class="emo">🚦</span><h3 data-i18n="home.h3.t"></h3><p data-i18n="home.h3.d"></p></div>
+      </div>
+      <h2 class="center" data-i18n="home.data"></h2>
+      <div class="chips data-chips">
+        <span>NASA POWER</span><span>SMAP</span><span>GPM IMERG</span><span>ECOSTRESS</span><span>Landsat</span><span>MODIS</span>
+        <span>GRACE-FO</span><span>SRTM</span><span>GLDAS</span><span>ESA Sentinel-2</span><span>ERA5</span><span>FAO GAEZ</span><span>SoilGrids</span>
+      </div>
+    </section>
+
+    <!-- AUTH -->
+    <section id="s-auth" class="screen">
+      <div class="auth-box card">
+        <div class="seg auth-seg" id="authSeg">
+          <button data-mode="register" data-i18n="auth.register"></button>
+          <button data-mode="login" data-i18n="auth.login"></button>
+        </div>
+        <form id="authForm" novalidate>
+          <label class="fld" id="nameFld"><span data-i18n="auth.name"></span>
+            <input id="fName" autocomplete="name" maxlength="60"></label>
+          <label class="fld"><span data-i18n="auth.phone"></span>
+            <input id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="06XXXXXXXX" dir="ltr"></label>
+          <label class="fld"><span data-i18n="auth.pin"></span>
+            <input id="fPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" dir="ltr"></label>
+          <p class="muted small" data-i18n="auth.pinHint"></p>
+          <p class="err" id="authErr" hidden></p>
+          <button class="btn primary big full" type="submit" id="authSubmit"></button>
+        </form>
+        <p class="muted small center-t" data-i18n="auth.privacy"></p>
+      </div>
+    </section>
+
+    <!-- ONBOARDING WIZARD -->
+    <section id="s-onboard" class="screen">
+      <h2 id="wzTitle"></h2>
+      <p class="muted" data-i18n="wz.intro"></p>
+
+      <!-- step 1: land -->
+      <div class="wz" data-step="0">
+        <div class="card q">
+          <h3><span class="qn">📍</span><span data-i18n="q.where"></span></h3>
+          <p class="muted" data-i18n="map.hint"></p>
+          <div class="map-wrap">
+            <div id="map"></div>
+            <button class="btn gps" id="gpsBtn" type="button">📍 <span data-i18n="map.gps"></span></button>
+          </div>
+          <div class="row wrap demo-row"><b data-i18n="map.demo"></b><span id="demoFields" class="chips"></span></div>
+          <div class="sel" id="selInfo"></div>
+          <div class="grid2 fields2">
+            <label class="fld"><span data-i18n="q.place"></span><input id="fPlace" maxlength="80"></label>
+            <label class="fld"><span data-i18n="farm.area"></span><input id="fArea" type="number" min="0.1" max="500" step="0.1" dir="ltr"></label>
+          </div>
+        </div>
+        <div class="card q">
+          <h3><span class="qn">🟫</span><span data-i18n="q.soil"></span></h3>
+          <div class="tiles small" id="soilTiles">
+            <button data-soil="clay"><span>🟫</span><b data-i18n="soil.clay"></b><small data-i18n="soil.clay.d"></small></button>
+            <button data-soil="loam"><span>🟤</span><b data-i18n="soil.loam"></b><small data-i18n="soil.loam.d"></small></button>
+            <button data-soil="sandy"><span>🏜️</span><b data-i18n="soil.sandy"></b><small data-i18n="soil.sandy.d"></small></button>
+            <button data-soil="stony"><span>🪨</span><b data-i18n="soil.stony"></b><small data-i18n="soil.stony.d"></small></button>
+            <button data-soil="salty"><span>🧂</span><b data-i18n="soil.salty"></b><small data-i18n="soil.salty.d"></small></button>
+            <button data-soil="unknown"><span>❔</span><b data-i18n="soil.unknown"></b></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- step 2: water -->
+      <div class="wz" data-step="1">
+        <div class="card q">
+          <h3><span class="qn">⛏️</span><span data-i18n="q.well"></span></h3>
+          <div class="tiles small" id="wellTiles">
+            <button data-well="1"><span>⛏️</span><b data-i18n="yes"></b></button>
+            <button data-well="0"><span>🚫</span><b data-i18n="no"></b></button>
+          </div>
+          <div id="wellMore">
+            <p class="sub" data-i18n="q.wellState"></p>
+            <div class="tiles small" id="wellStateTiles">
+              <button data-wstate="good"><span>💧💧</span><b data-i18n="well.good"></b></button>
+              <button data-wstate="weak"><span>💧</span><b data-i18n="well.weak"></b></button>
+              <button data-wstate="dry"><span>🏜️</span><b data-i18n="well.dry"></b></button>
+            </div>
+            <p class="sub" data-i18n="q.wellDepth"></p>
+            <div class="tiles small" id="wellDepthTiles">
+              <button data-wdepth="shallow"><b data-i18n="depth.shallow"></b><small>&lt; 30 m</small></button>
+              <button data-wdepth="medium"><b data-i18n="depth.medium"></b><small>30–80 m</small></button>
+              <button data-wdepth="deep"><b data-i18n="depth.deep"></b><small>&gt; 80 m</small></button>
+            </div>
+          </div>
+        </div>
+        <div class="card q">
+          <h3><span class="qn">🚰</span><span data-i18n="q.canal"></span></h3>
+          <div class="tiles small" id="canalTiles">
+            <button data-canal="1"><span>🚰</span><b data-i18n="yes"></b></button>
+            <button data-canal="0"><span>🚫</span><b data-i18n="no"></b></button>
+          </div>
+        </div>
+        <div class="card q" id="irrigBox">
+          <h3><span class="qn">💧</span><span data-i18n="farm.q2b"></span></h3>
+          <div class="tiles small" id="levelTiles">
+            <button data-level="1"><span>💧</span><b data-i18n="wl.1"></b><small>≈3 000 m³</small></button>
+            <button data-level="2"><span>💧💧</span><b data-i18n="wl.2"></b><small>≈6 000 m³</small></button>
+            <button data-level="3"><span>💧💧💧</span><b data-i18n="wl.3"></b><small>≈9 000 m³</small></button>
+            <button data-level="4"><span>🌊</span><b data-i18n="wl.4"></b><small>≈13 000 m³</small></button>
+          </div>
+          <div class="row wrap"><b data-i18n="farm.method"></b>
+            <span class="seg" id="methodSeg">
+              <button data-method="gravity" data-i18n="m.gravity"></button>
+              <button data-method="drip" data-i18n="m.drip"></button>
+            </span>
+          </div>
+        </div>
+        <div class="card rainonly" id="rainOnly" hidden>🌧️ <span data-i18n="q.rainOnly"></span></div>
+      </div>
+
+      <!-- step 3: crops -->
+      <div class="wz" data-step="2">
+        <div class="card q">
+          <h3><span class="qn">🌾</span><span data-i18n="q.crops"></span></h3>
+          <p class="muted" data-i18n="farm.q1.hint"></p>
+          <div id="historyBox"></div>
+        </div>
+        <div class="card q">
+          <h3><span class="qn">🔁</span><span id="contQ"></span></h3>
+          <div class="tiles small" id="contTiles">
+            <button data-cont="yes"><span>✅</span><b data-i18n="cont.yes"></b></button>
+            <button data-cont="no"><span>🔄</span><b data-i18n="cont.no"></b></button>
+            <button data-cont="unsure"><span>🤔</span><b data-i18n="cont.unsure"></b></button>
+          </div>
+          <div id="stopBox">
+            <p class="sub" data-i18n="q.why"></p>
+            <div class="tiles small" id="stopTiles">
+              <button data-stop="water"><span>🚱</span><b data-i18n="stop.water"></b></button>
+              <button data-stop="price"><span>📉</span><b data-i18n="stop.price"></b></button>
+              <button data-stop="disease"><span>🐛</span><b data-i18n="stop.disease"></b></button>
+              <button data-stop="try"><span>🌱</span><b data-i18n="stop.try"></b></button>
+            </div>
+          </div>
+        </div>
+        <div class="card q">
+          <h3><span class="qn">🫒</span><span data-i18n="q.trees"></span></h3>
+          <div class="tiles small multi" id="treeTiles">
+            <button data-tree="olive"><span>🫒</span><b data-i18n="tree.olive"></b></button>
+            <button data-tree="almond"><span>🌰</span><b data-i18n="tree.almond"></b></button>
+            <button data-tree="citrus"><span>🍊</span><b data-i18n="tree.citrus"></b></button>
+            <button data-tree="pomegranate"><span>🔴</span><b data-i18n="tree.pomegranate"></b></button>
+            <button data-tree="none"><span>🚫</span><b data-i18n="tree.none"></b></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- step 4: practices -->
+      <div class="wz" data-step="3">
+        <div class="card q">
+          <h3><span class="qn">🧪</span><span data-i18n="q.fert"></span></h3>
+          <div class="tiles small" id="fertTiles">
+            <button data-fert="chem"><span>🧪</span><b data-i18n="fert.chem"></b></button>
+            <button data-fert="manure"><span>💩</span><b data-i18n="fert.manure"></b></button>
+            <button data-fert="both"><span>🧪💩</span><b data-i18n="fert.both"></b></button>
+            <button data-fert="none"><span>🚫</span><b data-i18n="fert.none"></b></button>
+          </div>
+        </div>
+        <div class="card q">
+          <h3><span class="qn">🐛</span><span data-i18n="q.pest"></span></h3>
+          <div class="tiles small" id="pestTiles">
+            <button data-pest="often"><span>🧴🧴</span><b data-i18n="pest.often"></b></button>
+            <button data-pest="some"><span>🧴</span><b data-i18n="pest.some"></b></button>
+            <button data-pest="never"><span>🌿</span><b data-i18n="pest.never"></b></button>
+          </div>
+        </div>
+        <div class="card q">
+          <h3><span class="qn">🐄</span><span data-i18n="farm.q3"></span></h3>
+          <div class="tiles small" id="liveTiles">
+            <button data-live="1"><span>🐄</span><b data-i18n="yes"></b></button>
+            <button data-live="0"><span>🚫</span><b data-i18n="no"></b></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- step 5: priorities -->
+      <div class="wz" data-step="4">
+        <div class="card q">
+          <h3><span class="qn">⭐</span><span data-i18n="farm.q4"></span></h3>
+          <p class="muted" data-i18n="farm.q4.hint"></p>
+          <div class="tiles prio" id="prioTiles">
+            <button data-prio="water"><em></em><span>💧</span><b data-i18n="prio.water"></b></button>
+            <button data-prio="income"><em></em><span>💰</span><b data-i18n="prio.income"></b></button>
+            <button data-prio="soil"><em></em><span>🌱</span><b data-i18n="prio.soil"></b></button>
+            <button data-prio="forage"><em></em><span>🐄</span><b data-i18n="prio.forage"></b></button>
+          </div>
+          <button class="link" id="prioReset" type="button" data-i18n="farm.reset"></button>
+        </div>
+        <div class="card summary" id="profileSummary"></div>
+      </div>
+
+      <p class="err" id="wzErr" hidden></p>
+      <div class="nav-row">
+        <button class="btn ghost" id="wzBack" data-i18n="btn.back"></button>
+        <button class="btn primary big" id="wzNext"></button>
+      </div>
+    </section>
+
+    <!-- FIELD CARD -->
+    <section id="s-card" class="screen">
+      <div class="farm-banner" id="farmBanner"></div>
+      <div class="health card" id="healthBox"></div>
+      <p class="muted hint">👆 <span data-i18n="ind.tap"></span></p>
+      <div class="ind-grid compact" id="indGrid"></div>
+      <div class="card">
+        <h3 data-i18n="cal.title"></h3>
+        <p class="muted hint">👆 <span data-i18n="cal.tap"></span></p>
+        <div id="calendar"></div>
+        <div class="cal-detail" id="calDetail" hidden></div>
+        <p class="cal-msg" id="calMsg"></p>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3 data-i18n="chart.heat"></h3><canvas id="heatChart" height="200"></canvas></div>
+        <div class="card"><h3 data-i18n="chart.rain"></h3><canvas id="rainChart" height="200"></canvas></div>
+      </div>
+      <div class="card advisor-only" id="advTable"></div>
+      <div class="nav-row"><span></span>
+        <button class="btn primary big" data-tab="compare" data-i18n="card.go"></button>
+      </div>
+    </section>
+
+    <!-- COMPARE -->
+    <section id="s-compare" class="screen">
+      <h2 data-i18n="cmp.title"></h2>
+      <p class="muted" data-i18n="cmp.sub"></p>
+      <div id="planBox"></div>
+      <details class="card sim" id="simBox">
+        <summary><b>🎛️ <span data-i18n="sim.title"></span></b> <span class="muted" data-i18n="sim.sub"></span></summary>
+        <div class="sim-grid">
+          <label class="sim-row" id="simWaterRow"><span data-i18n="sim.water"></span>
+            <input type="range" id="simWater" min="0" max="15000" step="500"><output id="simWaterOut"></output></label>
+          <label class="sim-row"><span data-i18n="sim.rain"></span>
+            <input type="range" id="simRain" min="-50" max="30" step="10" value="0"><output id="simRainOut"></output></label>
+          <label class="sim-row"><span data-i18n="sim.heat"></span>
+            <input type="range" id="simHeat" min="0" max="3" step="0.5" value="0"><output id="simHeatOut"></output></label>
+        </div>
+        <div class="row wrap"><button class="btn ghost" id="simReset" type="button">↺ <span data-i18n="sim.reset"></span></button></div>
+      </details>
+      <div class="sim-active" id="simActive" hidden data-i18n="sim.active"></div>
+      <div id="prioSummary" class="chips"></div>
+      <div class="cmp-grid" id="cmpGrid"></div>
+    </section>
+
+    <!-- BUILD YOUR ROTATION -->
+    <section id="s-build" class="screen">
+      <h2 data-i18n="build.title"></h2>
+      <p class="muted" data-i18n="build.sub"></p>
+      <div class="build-wrap">
+        <div class="card build-years" id="buildYears"></div>
+        <div class="card build-result" id="buildResult"></div>
+      </div>
+    </section>
+
+    <!-- DETAIL -->
+    <section id="s-detail" class="screen">
+      <div class="row wrap picker no-print"><b data-i18n="det.pick"></b><span class="chips" id="detailPicker"></span></div>
+      <div id="detailBox"></div>
+      <div class="advice-note">🤝 <span data-i18n="det.advisor"></span></div>
+      <div class="row wrap actions no-print">
+        <button class="btn" id="listenBtn">🔊 <span data-i18n="det.listen"></span></button>
+        <button class="btn" id="printBtn">📄 <span data-i18n="det.print"></span></button>
+        <button class="btn wa" id="shareBtn">📲 <span data-i18n="det.share"></span></button>
+      </div>
+      <p class="err" id="voiceErr" hidden></p>
+      <div class="nav-row no-print">
+        <button class="btn ghost" data-tab="compare" data-i18n="btn.back"></button>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="s-profile" class="screen">
+      <h2 data-i18n="tab.profile"></h2>
+      <div class="card summary" id="profileView"></div>
+      <div class="row wrap">
+        <button class="btn primary" id="editProfile">✏️ <span data-i18n="prof.edit"></span></button>
+        <button class="btn" id="refreshBtn">🔄 <span data-i18n="prof.refresh"></span></button>
+        <button class="btn ghost danger" id="logoutBtn">🚪 <span data-i18n="prof.logout"></span></button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Loading -->
+  <div class="overlay" id="loading" hidden>
+    <div class="load-box">
+      <div class="spinner">🛰️</div>
+      <h3 data-i18n="load.title"></h3>
+      <ul id="loadSteps"></ul>
+    </div>
+  </div>
+
+  <!-- Glossary -->
+  <div class="overlay" id="glossary" hidden>
+    <div class="load-box gl">
+      <h3 data-i18n="gl.title"></h3>
+      <p id="glText"></p>
+      <ul class="gl-list" id="glList"></ul>
+      <button class="btn primary" id="glClose" data-i18n="gl.close"></button>
+    </div>
+  </div>
+
+  <footer>
+    <p>⚠️ <span data-i18n="foot.disc"></span></p>
+    <p class="muted"><span data-i18n="foot.team"></span> · Data: NASA POWER, SMAP, GPM, Landsat, MODIS, ECOSTRESS, GRACE-FO, SRTM · ESA Sentinel-2</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-farmer.js"></script>
+  <script src="js/i18n-ui.js"></script>
+  <script src="js/crops.js"></script>
+  <script src="js/regions.js"></script>
+  <script src="js/nasa.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
