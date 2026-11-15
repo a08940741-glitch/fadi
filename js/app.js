@@ -355,6 +355,7 @@
     state.selected = 1; state.custom = null; state.build = null;
     initSim(); $('#simActive').hidden = true; $('#simBox').open = false;
     renderDashboard(); renderProfileView();
+    loadWeather();
     show('card');
   }
   function renderDashboard() { renderCard(); renderCompare(); renderDetail(state.selected); }
@@ -396,7 +397,71 @@
       </div>`;
     }).join('');
     renderAdvTable();
+    renderWeather();
   }
+  // ---------- 7-day weather + farm alerts ----------
+  const WX_ICON = { chergui: '🌬️', heat: '🔥', frost: '❄️', rain: '🌧️' };
+  async function loadWeather() {
+    const f = state.user && state.user.profile && state.user.profile.field;
+    if (!f || !window.WEATHER) return;
+    state.wx = { loading: true };
+    renderWeather();
+    try { state.wx = await WEATHER.getForecast(f.lat, f.lng); }
+    catch (e) { console.warn('Forecast unavailable', e); state.wx = { error: true }; }
+    renderWeather();
+  }
+  function wxDayIcon(d) {
+    const a = d.alerts.map(x => x.type);
+    if (a.includes('chergui')) return WX_ICON.chergui;
+    if (a.includes('frost')) return WX_ICON.frost;
+    if (a.includes('heat')) return WX_ICON.heat;
+    if (a.includes('rain')) return WX_ICON.rain;
+    if (d.rain >= 1) return '🌦️';
+    return d.tmax >= 28 ? '☀️' : '⛅';
+  }
+  function renderWeather() {
+    const box = $('#wxBox'); if (!box) return;
+    const wx = state.wx;
+    const head = `<h3>🌦️ ${t('wx.title')}</h3>`;
+    if (!wx || wx.loading) { box.innerHTML = head + `<p class="muted">${t('wx.loading')}</p>`; return; }
+    if (wx.error) { box.innerHTML = head + `<p class="muted">${t('wx.error')}</p><button type="button" class="btn" id="wxRetry">🔄 ${t('wx.retry')}</button>`; return; }
+    const today = new Date().toISOString().slice(0, 10);
+    const dayName = d => d.date === today ? t('wx.today') : new Date(d.date + 'T12:00:00').toLocaleDateString(loc(), { weekday: 'short' });
+    const worst = d => d.alerts.some(a => a.level === 'red') ? 'red' : d.alerts.length ? 'amber' : '';
+    const days = wx.days.map(d => `<div class="wx-day ${worst(d)}">
+        <b>${dayName(d)}</b><span class="wx-ico" aria-hidden="true">${wxDayIcon(d)}</span>
+        <span class="wx-t">${bdi(Math.round(d.tmax) + '°')} <small>${bdi(Math.round(d.tmin) + '°')}</small></span>
+        <span class="wx-r">💧 ${bdi(Math.round(d.rain) + ' ' + t('wx.mm'))}</span>
+        ${d.alerts.length ? `<span class="wx-tag">${d.alerts.map(a => t('wx.' + a.type + '.t')).join(' · ')}</span>` : ''}
+      </div>`).join('');
+    // group alerts by type: which days, worst level, advice, and which crop in the field is sensitive now
+    const groups = {};
+    wx.days.forEach(d => d.alerts.forEach(a => {
+      const g = groups[a.type] || (groups[a.type] = { level: 'amber', days: [], months: new Set() });
+      if (a.level === 'red') g.level = 'red';
+      g.days.push(dayName(d)); g.months.add(new Date(d.date + 'T12:00:00').getMonth());
+    }));
+    const f = state.farm;
+    const inField = f ? [f.current.main[2], f.current.summer[2]].filter(id => id && id !== 'none' && id !== 'fallow' && CROPS[id]) : [];
+    const cropNote = (type, months) => {
+      const key = type === 'frost' ? 'frostSens' : (type === 'heat' || type === 'chergui') ? 'heatSens' : null;
+      if (!key) return '';
+      const hit = inField.filter(id => [...months].some(m => CROPS[id][key].includes(m) && CROPS[id].kc[m] > 0));
+      return hit.length ? `<p class="wx-crop">⚠️ ${esc(fmt('wx.cropNote', { c: hit.map(cname).join(' + '), what: t(key === 'frostSens' ? 'why.w.frost' : 'why.w.heat') }))}</p>` : '';
+    };
+    const order = ['chergui', 'heat', 'frost', 'rain'];
+    const alerts = order.filter(k => groups[k]).map(k => {
+      const g = groups[k];
+      return `<div class="wx-alert ${g.level}"><p><b>${WX_ICON[k]} ${t('wx.' + k + '.t')}</b> <span class="light ${g.level}">${t('lvl.' + g.level)}</span> · ${esc(g.days.join('، '))}</p>
+        <p>${t('wx.' + k + '.a')}</p>${cropNote(k, g.months)}</div>`;
+    }).join('');
+    const time = new Date(wx.fetched).toLocaleString(loc(), { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+    box.innerHTML = head + `<div class="wx-days">${days}</div>` +
+      (alerts || `<p class="wx-none">✅ ${t('wx.none')}</p>`) +
+      `<p class="muted small">${fmt('wx.src', { time: bdi(time) })}</p>`;
+  }
+  document.addEventListener('click', e => { if (e.target.closest('#wxRetry')) loadWeather(); });
+
   function calHTML(cal, mini) {
     const mo = t(mini ? 'monthsShort' : 'months'), icon = { crop: '🌱', bare: '', stress: '⚠️' };
     return `<div class="cal${mini ? ' mini' : ''}">${cal.map(c => `<div><div class="cell ${c.s}">${mini ? '' : icon[c.s]}</div>${mo[c.m]}</div>`).join('')}</div>`;

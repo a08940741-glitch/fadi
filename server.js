@@ -16,7 +16,7 @@ const SECURITY_HEADERS = {
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com",
     "font-src https://fonts.gstatic.com",
     "img-src 'self' data: blob: https://server.arcgisonline.com https://cdnjs.cloudflare.com",
-    "connect-src 'self' https://power.larc.nasa.gov https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://server.arcgisonline.com",
+    "connect-src 'self' https://power.larc.nasa.gov https://api.open-meteo.com https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://server.arcgisonline.com",
     "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'", "object-src 'none'"
   ].join('; ')
 };

@@ -2,6 +2,16 @@
 (function () {
   const add = {
     ar: {
+      'wx.title': 'الطقس ديال 7 أيام الجاية فالحقل ديالك', 'wx.loading': 'كنجيبو توقعات الطقس…', 'wx.retry': 'عاود',
+      'wx.error': 'ما قدرناش نجيبو توقعات الطقس دابا. خاص الأنترنت.', 'wx.today': 'اليوم', 'wx.mm': 'مم',
+      'wx.none': 'ما كاين حتى تنبيه هاد السيمانة: لا شركي، لا جريحة، لا شتا قوية.',
+      'wx.src': 'توقعات الطقس من Open-Meteo، اللي كتعتمد على نماذج ECMWF و GFS. تحدثات {time}. هادي ماشي معطيات ناسا.',
+      'wx.chergui.t': 'شركي', 'wx.heat.t': 'حرارة قوية', 'wx.frost.t': 'جريحة', 'wx.rain.t': 'شتا قوية',
+      'wx.chergui.a': 'ريح سخونة ويابسة. سقي فالصباح بكري ولا فالعشية، ماشي فوسط النهار. ما ترشش المبيدات نهار الشركي. إلا كان الحصاد قريب، قدمو.',
+      'wx.heat.a': 'سقي فالصباح بكري ولا فالعشية، وخلي الماشية فالظل مع الما.',
+      'wx.frost.a': 'سقية خفيفة نهار قبل كتعاون الأرض تحفظ السخانة فالليل. أجل غرس الشتلات الطرية حتى تدوز الجريحة.',
+      'wx.rain.a': 'أجل السماد ورش المبيدات حتى يدوز الشتا، ونقي السواقي باش الما يمشي.',
+      'wx.cropNote': '{c} فالحقل دابا، و{what} كتضرو فهاد الوقت.',
       'dl.btn': 'حمل التقرير PDF', 'dl.title': 'خطة الدورة الزراعية ديال الضيعة ديالي', 'dl.date': 'تاريخ الخطة',
       'dl.ind': 'المؤشرات ديال الحقل', 'dl.cmp': 'مقارنة الدورات', 'dl.advice': 'النصيحة الكاملة لكل دورة', 'dl.calendar': 'روزنامة الحقل', 'dl.rot': 'الدورة',
       'dl.sim': 'ملاحظة: هاد الأرقام فيها الإعدادات ديال «جرب: واش لو…؟».', 'dl.done': 'تحمل التقرير PDF ✅', 'dl.working': 'كنوجدو التقرير PDF…', 'dl.fallback': 'ما قدرناش نصاوبو PDF بلا أنترنت، حملنا ليك التقرير كملف كيتفتح فالمتصفح: حلو وضغط «طبع / PDF».',
@@ -24,6 +34,16 @@
       'sum.short': '{a} هكتار · {s}'
     },
     fr: {
+      'wx.title': 'Météo des 7 prochains jours sur votre champ', 'wx.loading': 'Chargement des prévisions…', 'wx.retry': 'Réessayer',
+      'wx.error': 'Prévisions indisponibles pour le moment. Une connexion internet est nécessaire.', 'wx.today': 'Auj.', 'wx.mm': 'mm',
+      'wx.none': 'Aucune alerte cette semaine : ni chergui, ni gel, ni forte pluie.',
+      'wx.src': 'Prévisions Open-Meteo (modèles ECMWF et GFS), mises à jour {time}. Ce ne sont pas des données NASA.',
+      'wx.chergui.t': 'Chergui', 'wx.heat.t': 'Forte chaleur', 'wx.frost.t': 'Gel', 'wx.rain.t': 'Forte pluie',
+      'wx.chergui.a': 'Vent chaud et très sec. Irriguez tôt le matin ou le soir, pas en milieu de journée. Ne traitez pas un jour de chergui. Si la récolte est proche, avancez-la.',
+      'wx.heat.a': 'Irriguez tôt le matin ou le soir, et gardez le bétail à l’ombre avec de l’eau.',
+      'wx.frost.a': 'Une irrigation légère la veille aide le sol à garder la chaleur la nuit. Reportez la plantation des jeunes plants après le gel.',
+      'wx.rain.a': 'Reportez engrais et traitements après la pluie, et dégagez les rigoles pour que l’eau s’écoule.',
+      'wx.cropNote': 'Au champ en ce moment : {c}, sensible à {what} à cette période.',
       'dl.btn': 'Télécharger le rapport PDF', 'dl.title': 'Plan de rotation de ma ferme', 'dl.date': 'Date du plan',
       'dl.ind': 'Indicateurs du champ', 'dl.cmp': 'Comparaison des rotations', 'dl.advice': 'Conseil complet pour chaque rotation', 'dl.calendar': 'Calendrier du champ', 'dl.rot': 'Rotation',
       'dl.sim': 'Note : ces chiffres incluent vos réglages « Et si… ? ».', 'dl.done': 'Rapport PDF téléchargé ✅', 'dl.working': 'Préparation du rapport PDF…', 'dl.fallback': 'Impossible de créer le PDF sans internet : le rapport a été téléchargé comme page web. Ouvrez-le et cliquez sur « Imprimer / PDF ».',
@@ -46,6 +66,16 @@
       'sum.short': '{a} ha · {s}'
     },
     en: {
+      'wx.title': 'Weather for the next 7 days on your field', 'wx.loading': 'Loading the forecast…', 'wx.retry': 'Try again',
+      'wx.error': 'The forecast is not available right now. An internet connection is needed.', 'wx.today': 'Today', 'wx.mm': 'mm',
+      'wx.none': 'No alerts this week: no chergui, no frost, no heavy rain.',
+      'wx.src': 'Open-Meteo forecast (ECMWF and GFS models), updated {time}. This is not NASA data.',
+      'wx.chergui.t': 'Chergui', 'wx.heat.t': 'Strong heat', 'wx.frost.t': 'Frost', 'wx.rain.t': 'Heavy rain',
+      'wx.chergui.a': 'Hot, very dry wind. Irrigate early morning or evening, not at midday. Do not spray on a chergui day. If harvest is close, bring it forward.',
+      'wx.heat.a': 'Irrigate early morning or evening, and keep livestock in the shade with water.',
+      'wx.frost.a': 'A light irrigation the day before helps the soil hold heat overnight. Delay planting young seedlings until the frost has passed.',
+      'wx.rain.a': 'Delay fertilizer and spraying until after the rain, and clear the channels so the water drains.',
+      'wx.cropNote': '{c} is in the field now and sensitive to {what} at this time.',
       'dl.btn': 'Download the PDF report', 'dl.title': 'Crop rotation plan for my farm', 'dl.date': 'Plan date',
       'dl.ind': 'Field indicators', 'dl.cmp': 'Rotation comparison', 'dl.advice': 'Full advice for each rotation', 'dl.calendar': 'Field calendar', 'dl.rot': 'Rotation',
       'dl.sim': 'Note: these figures include your “What if…?” settings.', 'dl.done': 'PDF report downloaded ✅', 'dl.working': 'Preparing the PDF report…', 'dl.fallback': 'Could not create the PDF without internet, so the report was downloaded as a web page. Open it and click “Print / PDF”.',

@@ -53,6 +53,7 @@ Then open http://localhost:8766. No dependencies or install needed. Leaflet, Cha
 | NASA POWER daily 2001–2025 (T2M_MAX, T2M_MIN, PRECTOTCORR, GWETROOT) | **Live API** for the exact point, cached in the browser |
 | Reference ET₀ | Computed from POWER with Hargreaves (FAO-56), ×0.85 semi-arid calibration |
 | SMAP, GRACE-FO, SRTM, Landsat/Sentinel-2 NDVI, ECOSTRESS, SoilGrids | Estimates per region (`js/regions.js`). `scripts/extract_layers_gee.js` extracts them for real in Google Earth Engine |
+| 7-day forecast (max/min temperature, rain, wind, humidity) | **Live** from the Open-Meteo API (free, no key; ECMWF / GFS models), cached 3 h. Not NASA data: NASA has no free point forecast. Drives the chergui, strong-heat, frost and heavy-rain alerts on the field card |
 
 If the NASA API cannot be reached, the app falls back to typical Tadla values and tells the user.
 
