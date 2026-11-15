@@ -15,7 +15,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const state = {
-    lang: localStorage.getItem('dawra.lang') || 'ar',
+    lang: localStorage.getItem('dawra.lang') || 'en',
     user: loadUser(), draft: null, wz: 0,
     zone: null, farm: null, climate: null, source: null, ind: null, rec: null, selected: 1,
     screen: 'home'
@@ -39,7 +39,6 @@
     document.documentElement.dir = t('dir');
     $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
     $$('.langs button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
-    renderDemoChips();
     if (state.screen === 'onboard') renderWizard();
     if (state.rec) { renderDashboard(); }
     if (state.user) renderProfileView();
@@ -76,13 +75,22 @@
     else show('onboard');
   });
 
-  // ---------- clear saved farm ----------
-  $('#logoutBtn').addEventListener('click', () => {
-    if (!confirm(t('prof.logout') + ' ?')) return;
+  // ---------- saved account history ----------
+  function clearSavedHistory() {
     localStorage.removeItem('dawra.profile');
-    Object.assign(state, { user: null, draft: null, rec: null, farm: null, climate: null });
-    document.body.classList.remove('advisor'); $('#advisorToggle').checked = false;
+    Object.assign(state, {
+      user: null, draft: null, wz: 0, zone: null, farm: null,
+      climate: null, source: null, ind: null, rec: null, selected: 1
+    });
+    document.body.classList.remove('advisor');
+    $('#advisorToggle').checked = false;
     show('home');
+  }
+  $('#clearHistoryBtn').addEventListener('click', () => {
+    if (confirm(t('prof.clearHistory.confirm'))) clearSavedHistory();
+  });
+  $('#logoutBtn').addEventListener('click', () => {
+    if (confirm(t('prof.logout.confirm'))) clearSavedHistory();
   });
 
   // ---------- wizard ----------
@@ -258,10 +266,6 @@
     map = L.map('map').setView([32.45, -6.55], innerWidth < 760 ? 8 : 9);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: 'Imagery © Esri, Maxar, Earthstar Geographics' }).addTo(map);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(map);
-    window.ZONES.forEach(z => {
-      L.circle([z.lat, z.lng], { radius: 9000, color: z.system === 'irrigated' ? '#4fc3f7' : z.system === 'rainfed' ? '#ffcc66' : '#a5d6a7', weight: 1.5, fillOpacity: 0.08 })
-        .addTo(map).bindTooltip(() => z.name[state.lang]);
-    });
     map.on('click', e => setField(e.latlng.lat, e.latlng.lng));
   }
   function distKm(a, b, c, d) {
@@ -289,22 +293,8 @@
     if (!p || !p.field) { box.innerHTML = '<span class="big-emo">📍</span><span class="muted">' + esc(t('map.none')) + '</span>'; return; }
     const z = findZone(p.field.lat, p.field.lng);
     if (map) { if (marker) marker.setLatLng([p.field.lat, p.field.lng]); else marker = L.marker([p.field.lat, p.field.lng]).addTo(map); }
-    box.innerHTML = `<span class="big-emo">🌾</span><div><b>${t('map.selected')}:</b> ${p.field.lat.toFixed(4)}, ${p.field.lng.toFixed(4)}<br><b>${t('map.zone')}:</b> ${esc(z.name[state.lang])}</div>${z.generic ? '<div class="warn">⚠️ ' + t('map.far') + '</div>' : ''}`;
+    box.innerHTML = `<span class="big-emo">🌾</span><div><b>${t('map.selected')}:</b> ${p.field.lat.toFixed(4)}, ${p.field.lng.toFixed(4)}<br><b>${t('map.region')}:</b> ${esc(z.name[state.lang])}</div>${z.generic ? '<div class="warn">⚠️ ' + t('map.far') + '</div>' : ''}`;
   }
-  function renderDemoChips() {
-    $('#demoFields').innerHTML = window.DEMO_FIELDS.map((d, i) => `<button type="button" class="chip" data-demo="${i}">${esc(d.label[state.lang])}</button>`).join('');
-  }
-  $('#demoFields').addEventListener('click', e => {
-    const b = e.target.closest('[data-demo]'); if (!b) return;
-    const d = window.DEMO_FIELDS[+b.dataset.demo];
-    if (state.draft) state.draft.field = null; // reset crops to the zone's typical rotation
-    setField(d.lat, d.lng);
-  });
-  $('#gpsBtn').addEventListener('click', () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => setField(pos.coords.latitude, pos.coords.longitude), () => wzError('err.field'));
-  });
-
   // ---------- profile → engine farm ----------
   function farmFromProfile(p) {
     const water = waterType(p);
@@ -408,17 +398,11 @@
           <div class="row"><small>🛰️ ${it.src}${it.demo ? ' · ' + t('src.demo') : ''}</small><button class="qbtn" data-gl="${it.gl}" aria-label="${t('gl.title')}">?</button></div></div>
       </div>`;
     }).join('');
-    // interactive calendar
-    state.cal = E.calendar(f.current.main[2], f.current.summer[2], state.climate, f);
-    $('#calendar').innerHTML = calHTML(state.cal, false) + `<div class="legend"><span><i style="background:var(--green-2)"></i>${t('cal.crop')}</span><span><i style="background:#d8b989"></i>${t('cal.bare')}</span><span><i style="background:var(--red)"></i>${t('cal.stress')}</span></div>`;
-    $('#calDetail').hidden = true;
-    const bare = state.cal.filter(c => c.s === 'bare').length;
-    $('#calMsg').textContent = bare >= 3 ? fmt('cal.msg', { n: bare }) : '';
     renderAdvTable();
   }
   function calHTML(cal, mini) {
-    const mo = t('months'), icon = { crop: '🌱', bare: '', stress: '⚠️' };
-    return `<div class="cal${mini ? ' mini' : ''}">${cal.map((c, i) => `<div><div class="cell ${c.s}" ${mini ? '' : `data-cal="${i}" role="button" tabindex="0"`}>${mini ? '' : icon[c.s]}</div>${mo[c.m]}</div>`).join('')}</div>`;
+    const mo = t(mini ? 'monthsShort' : 'months'), icon = { crop: '🌱', bare: '', stress: '⚠️' };
+    return `<div class="cal${mini ? ' mini' : ''}">${cal.map(c => `<div><div class="cell ${c.s}">${mini ? '' : icon[c.s]}</div>${mo[c.m]}</div>`).join('')}</div>`;
   }
   $('#indGrid').addEventListener('click', e => {
     if (e.target.closest('[data-gl]')) return;
@@ -427,29 +411,8 @@
     $$('#indGrid .ind').forEach(c => { c.classList.remove('open'); c.setAttribute('aria-expanded', 'false'); });
     if (open) { card.classList.add('open'); card.setAttribute('aria-expanded', 'true'); }
   });
-  $('#calendar').addEventListener('click', e => {
-    const cell = e.target.closest('[data-cal]'); if (!cell) return;
-    $$('#calendar .cell').forEach(c => c.classList.remove('sel')); cell.classList.add('sel');
-    const c = state.cal[+cell.dataset.cal], m = t('months')[c.m], f = state.farm, cl = state.climate;
-    const crops = [f.current.main[2], f.current.summer[2]].filter(x => x && x !== 'none' && CROPS[x].kc[c.m] > 0);
-    const cn = crops.map(cname).join(' + ');
-    let txt;
-    if (c.s === 'bare') txt = fmt('cal.d.bare', { m });
-    else if (c.s === 'crop') txt = fmt('cal.d.crop', { m, c: cn });
-    else {
-      const why = [];
-      crops.forEach(id => {
-        const cr = CROPS[id];
-        if (cr.heatSens.includes(c.m) && cl.heatMonthRecent[c.m] >= 2) why.push(t('why.w.heat'));
-        if (cr.frostSens.includes(c.m) && cl.frostMonthProb[c.m] > 0.2) why.push(t('why.w.frost'));
-      });
-      if (!why.length) why.push(t('why.w.dry'));
-      txt = fmt('cal.d.stress', { m, c: cn, why: [...new Set(why)].join(' + ') });
-    }
-    const d = $('#calDetail'); d.textContent = (c.s === 'stress' ? '⚠️ ' : c.s === 'bare' ? '🟫 ' : '🌱 ') + txt; d.hidden = false;
-  });
   document.addEventListener('keydown', e => {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-ind],[data-cal]')) { e.preventDefault(); e.target.click(); }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-ind]')) { e.preventDefault(); e.target.click(); }
   });
   function renderAdvTable() {
     const c = state.climate, z = state.zone, p = state.user.profile;
@@ -692,23 +655,7 @@
     }
   });
 
-  // voice / print / share
-  let speaking = false;
-  $('#listenBtn').addEventListener('click', () => {
-    const synth = window.speechSynthesis, err = $('#voiceErr');
-    if (!synth || !lastExplain) return;
-    if (speaking) { synth.cancel(); speaking = false; $('#listenBtn span').textContent = t('det.listen'); return; }
-    const voice = synth.getVoices().find(v => v.lang.toLowerCase().startsWith(state.lang));
-    if (!voice) { err.textContent = t('det.novoice'); err.hidden = false; return; }
-    err.hidden = true;
-    const { r, x } = lastExplain;
-    const text = [r.rot.main.map(cname).join(', '), t('det.why'), ...x.why, t('det.risks'), ...x.risks.slice(0, 3), t('det.advisor')].join('. ').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '');
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = voice; u.lang = voice.lang; u.rate = 0.95;
-    u.onend = () => { speaking = false; $('#listenBtn span').textContent = t('det.listen'); };
-    speaking = true; $('#listenBtn span').textContent = t('det.stop');
-    synth.speak(u);
-  });
+  // print / share
   $('#printBtn').addEventListener('click', () => window.print());
 
   // ---------- download the full plan (one self-contained HTML file, printable to PDF) ----------
@@ -762,7 +709,7 @@
       <h2>👤 ${t('tab.profile')}</h2><p>📍 ${p.place ? esc(p.place) + ' · ' : ''}${esc(z.name[state.lang])}</p>${summaryHTML(p)}
       <h2>🛰️ ${t('health.title')}</h2><p class="gauge"><b>${health}/100</b> — ${t(health < 40 ? 'health.bad' : health < 70 ? 'health.mid' : 'health.good')}</p>
       <h3>${t('dl.ind')}</h3><table>${indRows}</table>
-      <h3>${t('cal.title')}</h3>${calRow}
+      <h3>${t('dl.calendar')}</h3>${calRow}
       <h2>🔁 ${t('dl.cmp')}</h2>${renderPlan().replace(/class="card plan[^"]*"/, 'class="note"')}
       <table><tr><th>${t('dl.rot')}</th><th>💧 ${t('m.water').split(' (')[0]}</th><th>💰 ${t('m.income')}</th><th>🌱 ${t('m.soil')}</th><th>🐄 ${t('m.forage')}</th><th>⚠️ ${t('m.risk')}</th><th>${t('m.score')}</th></tr>${cmpRows}</table>
       <h2>💡 ${t('dl.advice')}</h2>${advice}
@@ -836,10 +783,54 @@
   });
   $('#shareBtn').addEventListener('click', () => {
     if (!lastExplain) return;
-    const { r, x } = lastExplain;
-    const msg = `🌾 ${t('share.head')}\n\n${r.rot.main.map((m, i) => `${NEXT_SEASONS[i]}: ${CROPS[m].icon} ${cname(m)}`).join('\n')}\n\n💡 ${x.why.slice(0, 3).join('\n• ')}\n\n🤝 ${t('det.advisor')}`;
+    const msg = buildWhatsAppMessage();
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   });
+  function buildWhatsAppMessage() {
+    const { r, x } = lastExplain, p = state.user.profile, z = state.zone, { farm } = ctxNow();
+    const sentence = { heat: 'heat.s', water: 'water.s', rain: 'rain.s', ground: 'ground.s', frost: 'frost.s', erosion: 'erosion.s' };
+    const order = { red: 0, amber: 1, green: 2 };
+    const indicatorLines = Object.keys(state.ind).sort((a, b) => order[state.ind[a].level] - order[state.ind[b].level]).map(k => {
+      const it = state.ind[k], vars = { ...it.vars };
+      if (k === 'water') vars.dir = t(vars.dir === 'drier' ? 'water.drier' : 'water.wetter');
+      return `- ${t('ind.' + k)}: ${t('lvl.' + it.level)}. ${fmt(sentence[k], vars)} (${it.src}${it.demo ? ', ' + t('src.demo') : ''})`;
+    });
+    const water = farm.water === 'rain'
+      ? `${t('m.deficit')}: ${r.ev.deficitPct}%`
+      : `${t('m.water')}: ${nf(r.ev.needYear)} m3/${t('ha')}, ${nf(Math.round(r.ev.needYear * farm.area))} m3 ${t('share.forArea')} ${nf(farm.area)} ${t('ha')}, ${t('share.available')}: ${nf(E.availableWater(farm))} m3/${t('ha')}, ${t('share.method')}: ${farm.method}`;
+    const sequence = rec => {
+      const labels = rec.arch === 'current' ? HIST_SEASONS : NEXT_SEASONS;
+      return rec.rot.main.map((m, i) => `${labels[i]}: ${cname(m)}${rec.rot.summer[i] !== 'none' ? ` + ${cname(rec.rot.summer[i])}` : ''}`).join('\n');
+    };
+    const recLines = allRecs().map((rec, i) => {
+      const explanation = E.explain(rec, activeRec().current, { cl: ctxNow().cl, zone: state.zone, farm, ind: state.ind, source: state.source }, t, fmt, state.lang);
+      return `${i === state.selected ? '[' + t('share.selected') + '] ' : ''}${rec.arch === 'current' ? t('cmp.current') : rec.arch === 'custom' ? t('build.custom') : t('arch.' + rec.arch)} - ${t('m.score')}: ${Math.round(rec.ev.total)}/100\n${sequence(rec)}\n${explanation.why.slice(0, 2).map(v => '  - ' + v).join('\n')}`;
+    });
+    const place = p.place ? `${p.place} · ` : '';
+    const coords = p.field ? ` (${Number(p.field.lat).toFixed(4)}, ${Number(p.field.lng).toFixed(4)})` : '';
+    return [
+      t('share.head'),
+      `${t('share.location')}: ${place}${z.name[state.lang]}${coords}`,
+      '',
+      t('share.indicators') + ':',
+      ...indicatorLines,
+      '',
+      t('share.water') + ':',
+      water,
+      '',
+      t('share.recommendations') + ':',
+      ...recLines,
+      '',
+      t('det.risks') + ':',
+      ...(x.risks.length ? x.risks.map(v => `- ${v}`) : [`- ${t('share.none')}`]),
+      '',
+      t('share.caveat') + ':',
+      `- ${t('det.advisor')}`,
+      ...(x.gaps.length ? x.gaps.map(v => `- ${v}`) : [])
+    ].join('\n')
+      .replace(/[•·—–]/g, match => match === '·' ? ', ' : match === '•' ? '-' : '-')
+      .replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/³/g, '3');
+  }
 
   // glossary
   document.addEventListener('click', e => {

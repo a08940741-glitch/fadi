@@ -99,9 +99,7 @@
           <p class="muted" data-i18n="map.hint"></p>
           <div class="map-wrap">
             <div id="map"></div>
-            <button class="btn gps" id="gpsBtn" type="button">📍 <span data-i18n="map.gps"></span></button>
           </div>
-          <div class="row wrap demo-row"><b data-i18n="map.demo"></b><span id="demoFields" class="chips"></span></div>
           <div class="sel" id="selInfo"></div>
           <div class="grid2 fields2">
             <label class="fld"><span data-i18n="q.place"></span><input id="fPlace" maxlength="80"></label>
@@ -262,13 +260,6 @@
       <div class="health card" id="healthBox"></div>
       <p class="muted hint">👆 <span data-i18n="ind.tap"></span></p>
       <div class="ind-grid compact" id="indGrid"></div>
-      <div class="card">
-        <h3 data-i18n="cal.title"></h3>
-        <p class="muted hint">👆 <span data-i18n="cal.tap"></span></p>
-        <div id="calendar"></div>
-        <div class="cal-detail" id="calDetail" hidden></div>
-        <p class="cal-msg" id="calMsg"></p>
-      </div>
       <div class="grid2">
         <div class="card"><h3 data-i18n="chart.heat"></h3><canvas id="heatChart" height="200"></canvas></div>
         <div class="card"><h3 data-i18n="chart.rain"></h3><canvas id="rainChart" height="200"></canvas></div>
@@ -318,11 +309,9 @@
       <div class="advice-note">🤝 <span data-i18n="det.advisor"></span></div>
       <div class="row wrap actions no-print">
         <button class="btn primary" id="downloadBtn">📥 <span data-i18n="dl.btn"></span></button>
-        <button class="btn" id="listenBtn">🔊 <span data-i18n="det.listen"></span></button>
         <button class="btn" id="printBtn">📄 <span data-i18n="det.print"></span></button>
         <button class="btn wa" id="shareBtn">📲 <span data-i18n="det.share"></span></button>
       </div>
-      <p class="err" id="voiceErr" hidden></p>
       <p class="muted" id="dlMsg" hidden></p>
       <div class="nav-row no-print">
         <button class="btn ghost" data-tab="compare" data-i18n="btn.back"></button>
@@ -336,7 +325,8 @@
       <div class="row wrap">
         <button class="btn primary" id="editProfile">✏️ <span data-i18n="prof.edit"></span></button>
         <button class="btn" id="refreshBtn">🔄 <span data-i18n="prof.refresh"></span></button>
-        <button class="btn ghost danger" id="logoutBtn">🗑️ <span data-i18n="prof.logout"></span></button>
+        <button class="btn ghost danger" id="clearHistoryBtn">🧹 <span data-i18n="prof.clearHistory"></span></button>
+        <button class="btn ghost danger" id="logoutBtn">🚪 <span data-i18n="prof.logout"></span></button>
       </div>
     </section>
   </main>

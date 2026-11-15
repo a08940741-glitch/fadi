@@ -65,10 +65,3 @@ window.GENERIC_ZONE = {
   current: { main: ['durum', 'durum', 'durum'], summer: ['none', 'none', 'none'] },
   generic: true
 };
-
-// Demo fields for the judges
-window.DEMO_FIELDS = [
-  { zone: 'beniamir', lat: 32.512, lng: -6.701, label: { ar: 'حقل فاطمة (سقوي)', fr: 'Champ de Fatima (irrigué)', en: 'Fatima’s field (irrigated)' } },
-  { zone: 'khouribga', lat: 32.862, lng: -6.884, label: { ar: 'حقل حسن (بور)', fr: 'Champ de Hassan (bour)', en: 'Hassan’s field (rain-fed)' } },
-  { zone: 'dir', lat: 32.381, lng: -6.318, label: { ar: 'حقل فالدير', fr: 'Champ du Dir', en: 'Dir foothill field' } }
-];

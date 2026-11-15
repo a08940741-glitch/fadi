@@ -9,7 +9,7 @@ const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'geolocation=(self), camera=(), microphone=()',
+  'Permissions-Policy': 'geolocation=(), camera=(), microphone=()',
   'Content-Security-Policy': [
     "default-src 'self'",
     "script-src 'self' https://cdnjs.cloudflare.com",
