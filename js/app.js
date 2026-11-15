@@ -1,4 +1,4 @@
-// DAWRA — farmer platform interface: account, farm profile wizard, dashboard
+// DAWRA — farmer platform interface: farm profile wizard, dashboard (no login; profile kept in this browser)
 (function () {
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
@@ -16,11 +16,14 @@
 
   const state = {
     lang: localStorage.getItem('dawra.lang') || 'ar',
-    token: localStorage.getItem('dawra.token') || null,
-    user: null, draft: null, wz: 0,
+    user: loadUser(), draft: null, wz: 0,
     zone: null, farm: null, climate: null, source: null, ind: null, rec: null, selected: 1,
-    screen: 'home', authMode: 'register'
+    screen: 'home'
   };
+  function loadUser() {
+    try { const p = JSON.parse(localStorage.getItem('dawra.profile')); return p ? { name: '', profile: p } : null; }
+    catch (e) { return null; }
+  }
 
   // ---------- i18n ----------
   const t = k => (window.I18N[state.lang][k] ?? window.I18N.en[k] ?? k);
@@ -36,22 +39,10 @@
     document.documentElement.dir = t('dir');
     $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
     $$('.langs button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
-    renderAuthMode(); renderDemoChips();
+    renderDemoChips();
     if (state.screen === 'onboard') renderWizard();
     if (state.rec) { renderDashboard(); }
     if (state.user) renderProfileView();
-  }
-
-  // ---------- API ----------
-  async function api(path, method = 'GET', data) {
-    const headers = { 'Content-Type': 'application/json' };
-    if (state.token) headers.Authorization = 'Bearer ' + state.token;
-    let res;
-    try { res = await fetch(path, { method, headers, body: data ? JSON.stringify(data) : undefined }); }
-    catch (e) { return { ok: false, error: 'network' }; }
-    let json = {};
-    try { json = await res.json(); } catch (e) { /* empty */ }
-    return { ok: res.ok, status: res.status, ...json };
   }
 
   // ---------- screens ----------
@@ -66,9 +57,7 @@
       b.classList.toggle('on', b.dataset.tab === screen);
       b.disabled = b.dataset.tab !== 'profile' && !state.rec;
     });
-    $('#whoBox').hidden = !state.user;
     $('#advisorSwitch').hidden = !state.user;
-    if (state.user) $('#whoName').textContent = state.user.name;
     if (screen === 'onboard') setTimeout(() => map && map.invalidateSize(), 80);
     if (screen === 'card' && state.rec) setTimeout(drawCharts, 60);
     if (screen === 'build' && state.rec) renderBuild();
@@ -78,66 +67,23 @@
   document.addEventListener('click', e => {
     const tab = e.target.closest('[data-tab]');
     if (tab && !tab.disabled) { e.preventDefault(); show(tab.dataset.tab); }
-    const a = e.target.closest('[data-auth]');
-    if (a) { state.authMode = a.dataset.auth; renderAuthMode(); show('auth'); }
+    if (e.target.closest('[data-start]')) { if (state.user && state.user.profile.complete) analyse(); else startWizard(); }
   });
   $('#brandLink').addEventListener('click', e => {
     e.preventDefault();
-    if (!state.user) show('home');
+    if (!state.user && state.screen !== 'onboard') show('home');
     else if (state.rec) show('card');
     else show('onboard');
   });
 
-  // ---------- auth ----------
-  function renderAuthMode() {
-    const reg = state.authMode === 'register';
-    $$('#authSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.authMode));
-    $('#nameFld').hidden = !reg;
-    $('#authSubmit').textContent = t(reg ? 'auth.submitReg' : 'auth.submitLogin');
-    $('#fPin').autocomplete = reg ? 'new-password' : 'current-password';
-    $('#authErr').hidden = true;
-  }
-  $('#authSeg').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    state.authMode = b.dataset.mode; renderAuthMode();
-  });
-  function authError(key, field) {
-    const er = $('#authErr'); er.textContent = t(key); er.hidden = false;
-    $$('#authForm input').forEach(i => i.classList.remove('bad'));
-    if (field) { field.classList.add('bad'); field.focus(); }
-  }
-  $$('#authForm input').forEach(i => i.addEventListener('input', () => { i.classList.remove('bad'); $('#authErr').hidden = true; }));
-  $('#authForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const reg = state.authMode === 'register';
-    const name = $('#fName').value.trim(), phone = $('#fPhone').value.replace(/[\s.-]/g, ''), pin = $('#fPin').value;
-    if (reg && name.length < 2) return authError('err.name', $('#fName'));
-    if (!/^(\+212|00212|0)[5-7]\d{8}$/.test(phone)) return authError('err.phone', $('#fPhone'));
-    if (!/^\d{4,8}$/.test(pin)) return authError('err.pin', $('#fPin'));
-    const btn = $('#authSubmit'); btn.disabled = true;
-    const r = await api(reg ? '/api/register' : '/api/login', 'POST', reg ? { name, phone, pin } : { phone, pin });
-    btn.disabled = false;
-    if (!r.ok) {
-      const map = { phone: 'err.phone', name: 'err.name', pin: 'err.pin', exists: 'err.exists', wrong: 'err.wrong', locked: 'err.locked', storage: 'err.storage', network: 'err.network' };
-      return authError(map[r.error] || 'err.network');
-    }
-    $('#fPin').value = '';
-    onLoggedIn(r.token, r.user);
-  });
-  function onLoggedIn(token, user) {
-    state.token = token; state.user = user;
-    localStorage.setItem('dawra.token', token);
-    if (user.profile && user.profile.complete) { analyse(); }
-    else startWizard();
-  }
-  async function logout() {
-    await api('/api/logout', 'POST');
-    localStorage.removeItem('dawra.token');
-    Object.assign(state, { token: null, user: null, draft: null, rec: null, farm: null, climate: null });
+  // ---------- clear saved farm ----------
+  $('#logoutBtn').addEventListener('click', () => {
+    if (!confirm(t('prof.logout') + ' ?')) return;
+    localStorage.removeItem('dawra.profile');
+    Object.assign(state, { user: null, draft: null, rec: null, farm: null, climate: null });
     document.body.classList.remove('advisor'); $('#advisorToggle').checked = false;
     show('home');
-  }
-  $('#logoutBtn').addEventListener('click', logout);
+  });
 
   // ---------- wizard ----------
   function emptyProfile() {
@@ -149,7 +95,7 @@
     };
   }
   function startWizard(edit) {
-    state.draft = edit && state.user.profile ? JSON.parse(JSON.stringify(state.user.profile)) : emptyProfile();
+    state.draft = edit && state.user && state.user.profile ? JSON.parse(JSON.stringify(state.user.profile)) : emptyProfile();
     state.wz = 0;
     initMap();
     show('onboard');
@@ -243,11 +189,9 @@
     if (state.wz < WZ_STEPS - 1) { state.wz++; renderWizard(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (state.wz === 0) map.invalidateSize(); return; }
     // save profile
     const p = { ...state.draft, area: parseFloat(state.draft.area), complete: true };
-    const btn = $('#wzNext'); btn.disabled = true;
-    const r = await api('/api/profile', 'PUT', { profile: p });
-    btn.disabled = false;
-    if (!r.ok) return wzError(r.status === 401 ? 'err.wrong' : r.error === 'storage' ? 'err.storage' : 'err.network');
-    state.user = r.user;
+    p.updated = new Date().toISOString();
+    try { localStorage.setItem('dawra.profile', JSON.stringify(p)); } catch (e) { /* private mode: keep it for this visit only */ }
+    state.user = { name: '', profile: p };
     analyse();
   });
   $('#wzBack').addEventListener('click', () => { if (state.wz > 0) { state.wz--; renderWizard(); if (state.wz === 0) setTimeout(() => map.invalidateSize(), 60); } });
@@ -791,11 +735,7 @@
   // ---------- start ----------
   applyLang(state.lang);
   (async () => {
-    if (!state.token) return show('home');
-    const r = await api('/api/me');
-    if (!r.ok) { localStorage.removeItem('dawra.token'); state.token = null; return show('home'); }
-    state.user = r.user;
-    if (r.user.profile && r.user.profile.complete) analyse(); else startWizard();
+    if (state.user && state.user.profile.complete) analyse(); else show('home');
   })();
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
