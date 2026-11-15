@@ -30,14 +30,11 @@ Then open http://localhost:8766. No dependencies or install needed. Leaflet, Cha
 - **Advice:** a quick switch between all rotations, a score gauge, and sections you open and close (why and risks are open by default). **Download the PDF report** saves an A4 PDF with the farm, field health, comparison and full advice for every rotation, in the chosen language (html2pdf.js from cdnjs, loaded only on click). Without internet it saves the same report as an HTML page with a Print / PDF button.
 - **My farm:** profile summary, edit, re-run analysis, clear my information.
 
-### Security
-- Codes hashed with scrypt + random salt; the hash is never sent to the browser.
-- Lockout after 8 wrong codes per phone (15 min), plus 30 auth attempts per IP per 15 min.
-- Random 192-bit session tokens, 30-day expiry, max 5 per farmer, revoked on logout.
-- The server validates the profile against fixed lists, strips HTML, and rejects anything incomplete or unknown.
-- The server only serves an allow-list of public files (`data/`, `server.js` and `.claude/` are unreachable), sends a CSP, X-Frame-Options and nosniff headers, and has a body size limit.
-- All user text is HTML-escaped in the interface. The offline cache never stores `/api/` responses.
-- **Before a real deployment:** serve over HTTPS, move to a real database, add SMS verification of the phone number and an account-deletion option.
+### Privacy and security
+- No accounts: no name, phone number or code is ever asked, and the server stores nothing about farmers. Each farmer's answers stay in their own browser (localStorage) until they tap **Clear my information**.
+- `server.js` only serves an allow-list of public files (`server.js`, `data/` and `.git/` are unreachable) and sends a CSP, X-Frame-Options and nosniff headers. It has no API and no database.
+- All user text is HTML-escaped in the interface.
+- **Before a real deployment:** serve over HTTPS (Render does this automatically).
 
 ## The 5 screens
 
