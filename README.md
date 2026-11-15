@@ -12,9 +12,9 @@ node server.js
 
 Then open http://localhost:8766. No dependencies or install needed. Leaflet, Chart.js and the Cairo font load from CDNs.
 
-## Farmer accounts and profile
+## Farm profile (no login)
 
-1. **Sign up** with a name, a Moroccan phone number and a 4–8 digit secret code (no e-mail). **Log in** later with phone + code.
+1. The site opens straight on the farm questionnaire: no name, phone number or code is asked. The DAWRA logo shows the info page. There is no account: the finished profile is saved in the farmer's own browser (localStorage), so the dashboard reopens on the next visit. **My farm → Clear my information** deletes it.
 2. **Farm profile wizard** (5 steps, every answer required before moving on):
    - Land & soil: location on the map, commune/village, area, soil type (tirs/clay, hamri/loam, sandy, stony, salty, unknown)
    - Water: well (condition, depth), dam canal, amount of water, irrigation method
@@ -27,8 +27,8 @@ Then open http://localhost:8766. No dependencies or install needed. Leaflet, Cha
 - **Field card:** farm banner, a 0–100 health gauge, 6 indicators sorted by risk (tap one to open its explanation), and a calendar where you tap a month to see what happens in it and why it is at risk.
 - **Rotations:** a plan check for the "same crop again" answer, a **"What if…?" simulator** (sliders for available water, a dry/wet year, +0–3 °C) that recomputes every suggestion live, and 4 comparison cards with numeric scores.
 - **Build my rotation:** the farmer picks the crop for each year and sees the score, the gain vs the current rotation, and warnings (repeated family, no legume, not enough water, beet too often, fallow) live, then opens the full advice for that rotation.
-- **Advice:** a quick switch between all rotations, a score gauge, and sections you open and close (why and risks are open by default).
-- **My farm:** profile summary, edit, re-run analysis, log out.
+- **Advice:** a quick switch between all rotations, a score gauge, and sections you open and close (why and risks are open by default). **Download the PDF report** saves an A4 PDF with the farm, field health, comparison and full advice for every rotation, in the chosen language (html2pdf.js from cdnjs, loaded only on click). Without internet it saves the same report as an HTML page with a Print / PDF button.
+- **My farm:** profile summary, edit, re-run analysis, clear my information.
 
 ### Security
 - Codes hashed with scrypt + random salt; the hash is never sent to the browser.

@@ -21,7 +21,6 @@
       <span><b>DAWRA <span class="ar-name">دورة</span></b><small data-i18n="brand.sub"></small></span>
     </a>
     <div class="top-actions">
-      <span class="who" id="whoBox" hidden>👤 <b id="whoName"></b></span>
       <label class="switch advisor-switch" id="advisorSwitch" hidden title="Advisor mode">
         <input type="checkbox" id="advisorToggle">
         <span class="slider"></span>
@@ -62,8 +61,7 @@
           <h1 data-i18n="home.title"></h1>
           <p class="lead" data-i18n="home.lead"></p>
           <div class="row wrap">
-            <button class="btn primary big" data-auth="register" data-i18n="auth.registerCta"></button>
-            <button class="btn ghost big" data-auth="login" data-i18n="auth.loginCta"></button>
+            <button class="btn primary big" data-start data-i18n="auth.registerCta"></button>
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
@@ -86,28 +84,6 @@
       <div class="chips data-chips">
         <span>NASA POWER</span><span>SMAP</span><span>GPM IMERG</span><span>ECOSTRESS</span><span>Landsat</span><span>MODIS</span>
         <span>GRACE-FO</span><span>SRTM</span><span>GLDAS</span><span>ESA Sentinel-2</span><span>ERA5</span><span>FAO GAEZ</span><span>SoilGrids</span>
-      </div>
-    </section>
-
-    <!-- AUTH -->
-    <section id="s-auth" class="screen">
-      <div class="auth-box card">
-        <div class="seg auth-seg" id="authSeg">
-          <button data-mode="register" data-i18n="auth.register"></button>
-          <button data-mode="login" data-i18n="auth.login"></button>
-        </div>
-        <form id="authForm" novalidate>
-          <label class="fld" id="nameFld"><span data-i18n="auth.name"></span>
-            <input id="fName" autocomplete="name" maxlength="60"></label>
-          <label class="fld"><span data-i18n="auth.phone"></span>
-            <input id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="06XXXXXXXX" dir="ltr"></label>
-          <label class="fld"><span data-i18n="auth.pin"></span>
-            <input id="fPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" dir="ltr"></label>
-          <p class="muted small" data-i18n="auth.pinHint"></p>
-          <p class="err" id="authErr" hidden></p>
-          <button class="btn primary big full" type="submit" id="authSubmit"></button>
-        </form>
-        <p class="muted small center-t" data-i18n="auth.privacy"></p>
       </div>
     </section>
 
@@ -341,11 +317,13 @@
       <div id="detailBox"></div>
       <div class="advice-note">🤝 <span data-i18n="det.advisor"></span></div>
       <div class="row wrap actions no-print">
+        <button class="btn primary" id="downloadBtn">📥 <span data-i18n="dl.btn"></span></button>
         <button class="btn" id="listenBtn">🔊 <span data-i18n="det.listen"></span></button>
         <button class="btn" id="printBtn">📄 <span data-i18n="det.print"></span></button>
         <button class="btn wa" id="shareBtn">📲 <span data-i18n="det.share"></span></button>
       </div>
       <p class="err" id="voiceErr" hidden></p>
+      <p class="muted" id="dlMsg" hidden></p>
       <div class="nav-row no-print">
         <button class="btn ghost" data-tab="compare" data-i18n="btn.back"></button>
       </div>
@@ -358,7 +336,7 @@
       <div class="row wrap">
         <button class="btn primary" id="editProfile">✏️ <span data-i18n="prof.edit"></span></button>
         <button class="btn" id="refreshBtn">🔄 <span data-i18n="prof.refresh"></span></button>
-        <button class="btn ghost danger" id="logoutBtn">🚪 <span data-i18n="prof.logout"></span></button>
+        <button class="btn ghost danger" id="logoutBtn">🗑️ <span data-i18n="prof.logout"></span></button>
       </div>
     </section>
   </main>
