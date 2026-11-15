@@ -89,9 +89,6 @@
   $('#clearHistoryBtn').addEventListener('click', () => {
     if (confirm(t('prof.clearHistory.confirm'))) clearSavedHistory();
   });
-  $('#logoutBtn').addEventListener('click', () => {
-    if (confirm(t('prof.logout.confirm'))) clearSavedHistory();
-  });
 
   // ---------- wizard ----------
   function emptyProfile() {
