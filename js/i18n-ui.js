@@ -2,9 +2,9 @@
 (function () {
   const add = {
     ar: {
-      'dl.btn': 'حمل الخطة كاملة', 'dl.title': 'خطة الدورة الزراعية ديال الضيعة ديالي', 'dl.date': 'تاريخ الخطة',
+      'dl.btn': 'حمل التقرير PDF', 'dl.title': 'خطة الدورة الزراعية ديال الضيعة ديالي', 'dl.date': 'تاريخ الخطة',
       'dl.ind': 'المؤشرات ديال الحقل', 'dl.cmp': 'مقارنة الدورات', 'dl.advice': 'النصيحة الكاملة لكل دورة', 'dl.rot': 'الدورة',
-      'dl.sim': 'ملاحظة: هاد الأرقام فيها الإعدادات ديال «جرب: واش لو…؟».', 'dl.done': 'تحملات الخطة ✅',
+      'dl.sim': 'ملاحظة: هاد الأرقام فيها الإعدادات ديال «جرب: واش لو…؟».', 'dl.done': 'تحمل التقرير PDF ✅', 'dl.working': 'كنوجدو التقرير PDF…', 'dl.fallback': 'ما قدرناش نصاوبو PDF بلا أنترنت، حملنا ليك التقرير كملف كيتفتح فالمتصفح: حلو وضغط «طبع / PDF».',
       'dl.footer': 'دورة أداة مساعدة، ما كتعوضش التجربة ديالك ولا المستشار الفلاحي.',
       'tab.build': 'صاوب الدورة ديالك',
       'health.title': 'صحة الحقل', 'health.counts': '{r} خطر · {a} رد البال · {g} مزيان',
@@ -26,9 +26,9 @@
       'sum.short': '{a} هكتار · {s}'
     },
     fr: {
-      'dl.btn': 'Télécharger le plan complet', 'dl.title': 'Plan de rotation de ma ferme', 'dl.date': 'Date du plan',
+      'dl.btn': 'Télécharger le rapport PDF', 'dl.title': 'Plan de rotation de ma ferme', 'dl.date': 'Date du plan',
       'dl.ind': 'Indicateurs du champ', 'dl.cmp': 'Comparaison des rotations', 'dl.advice': 'Conseil complet pour chaque rotation', 'dl.rot': 'Rotation',
-      'dl.sim': 'Note : ces chiffres incluent vos réglages « Et si… ? ».', 'dl.done': 'Plan téléchargé ✅',
+      'dl.sim': 'Note : ces chiffres incluent vos réglages « Et si… ? ».', 'dl.done': 'Rapport PDF téléchargé ✅', 'dl.working': 'Préparation du rapport PDF…', 'dl.fallback': 'Impossible de créer le PDF sans internet : le rapport a été téléchargé comme page web. Ouvrez-le et cliquez sur « Imprimer / PDF ».',
       'dl.footer': 'DAWRA est un outil d’aide. Il ne remplace ni votre expérience ni le conseiller agricole.',
       'tab.build': 'Ma rotation',
       'health.title': 'Santé du champ', 'health.counts': '{r} risques · {a} à surveiller · {g} bons',
@@ -50,9 +50,9 @@
       'sum.short': '{a} ha · {s}'
     },
     en: {
-      'dl.btn': 'Download the full plan', 'dl.title': 'Crop rotation plan for my farm', 'dl.date': 'Plan date',
+      'dl.btn': 'Download the PDF report', 'dl.title': 'Crop rotation plan for my farm', 'dl.date': 'Plan date',
       'dl.ind': 'Field indicators', 'dl.cmp': 'Rotation comparison', 'dl.advice': 'Full advice for each rotation', 'dl.rot': 'Rotation',
-      'dl.sim': 'Note: these figures include your “What if…?” settings.', 'dl.done': 'Plan downloaded ✅',
+      'dl.sim': 'Note: these figures include your “What if…?” settings.', 'dl.done': 'PDF report downloaded ✅', 'dl.working': 'Preparing the PDF report…', 'dl.fallback': 'Could not create the PDF without internet, so the report was downloaded as a web page. Open it and click “Print / PDF”.',
       'dl.footer': 'DAWRA is a support tool. It does not replace your experience or the agricultural advisor.',
       'tab.build': 'Build my rotation',
       'health.title': 'Field health', 'health.counts': '{r} risks · {a} to watch · {g} good',

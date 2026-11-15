@@ -712,7 +712,7 @@
   $('#printBtn').addEventListener('click', () => window.print());
 
   // ---------- download the full plan (one self-contained HTML file, printable to PDF) ----------
-  function planDocument() {
+  function planParts() {
     const p = state.user.profile, z = state.zone, { cl, farm } = ctxNow(), recs = allRecs();
     const cur = activeRec().current, arrow = t('dir') === 'rtl' ? ' ← ' : ' → ';
     const ctx = { cl, zone: state.zone, farm, ind: state.ind, source: state.source };
@@ -756,10 +756,8 @@
       .years td{text-align:center;width:33%}.big{font-size:28px}.note{background:#fff8e1;border-inline-start:4px solid #d68910;padding:8px 12px}
       .gauge{font-size:20px}footer{margin-top:32px;color:#666;font-size:13px;border-top:1px solid #ddd;padding-top:12px}
       @media print{button{display:none}body{padding:0}h2{page-break-after:avoid}}`;
-    return `<!DOCTYPE html><html lang="${state.lang}" dir="${t('dir')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>DAWRA — ${t('dl.title')}</title><style>${css}</style></head><body>
-      <header><div><h1>🌾 DAWRA دورة</h1><div>${t('dl.title')}</div><div class="meta">${t('dl.date')}: ${date} · 🛰️ ${t('src.' + state.source)}</div></div>
-        <button onclick="window.print()">📄 ${t('det.print')}</button></header>
+    const body = `<header><div><h1>🌾 DAWRA دورة</h1><div>${t('dl.title')}</div><div class="meta">${t('dl.date')}: ${date} · 🛰️ ${t('src.' + state.source)}</div></div>
+        <button class="no-pdf" onclick="window.print()">📄 ${t('det.print')}</button></header>
       ${state.simRec ? `<p class="note">${t('dl.sim')}</p>` : ''}
       <h2>👤 ${t('tab.profile')}</h2><p>📍 ${p.place ? esc(p.place) + ' · ' : ''}${esc(z.name[state.lang])}</p>${summaryHTML(p)}
       <h2>🛰️ ${t('health.title')}</h2><p class="gauge"><b>${health}/100</b> — ${t(health < 40 ? 'health.bad' : health < 70 ? 'health.mid' : 'health.good')}</p>
@@ -769,18 +767,72 @@
       <table><tr><th>${t('dl.rot')}</th><th>💧 ${t('m.water').split(' (')[0]}</th><th>💰 ${t('m.income')}</th><th>🌱 ${t('m.soil')}</th><th>🐄 ${t('m.forage')}</th><th>⚠️ ${t('m.risk')}</th><th>${t('m.score')}</th></tr>${cmpRows}</table>
       <h2>💡 ${t('dl.advice')}</h2>${advice}
       <p class="note">🤝 ${t('det.advisor')}</p>
-      <footer>${t('dl.footer')}<br>NASA POWER · SMAP · GPM IMERG · GRACE-FO · SRTM · Landsat / Sentinel-2 · NASA Space Apps 2026 · Beni Mellal</footer>
-      </body></html>`;
+      <footer>${t('dl.footer')}<br>NASA POWER · SMAP · GPM IMERG · GRACE-FO · SRTM · Landsat / Sentinel-2 · NASA Space Apps 2026 · Beni Mellal</footer>`;
+    return { css, body };
   }
-  $('#downloadBtn').addEventListener('click', () => {
-    if (!state.rec) return;
-    const blob = new Blob([planDocument()], { type: 'text/html;charset=utf-8' });
+  function planDocument() {
+    const { css, body } = planParts();
+    return `<!DOCTYPE html><html lang="${state.lang}" dir="${t('dir')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>DAWRA — ${t('dl.title')}</title><style>${css}</style></head><body>${body}</body></html>`;
+  }
+  const PDF_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+  // Build the PDF inside a hidden page as wide as the A4 printable area (194 mm ≈ 733 px), so the report keeps its own layout and text direction
+  function makePdf(filename) {
+    return new Promise((ok, fail) => {
+      const fr = document.createElement('iframe');
+      fr.setAttribute('aria-hidden', 'true'); fr.tabIndex = -1;
+      fr.style.cssText = 'position:fixed;left:-10000px;top:0;width:733px;height:1123px;border:0;background:#fff';
+      document.body.appendChild(fr);
+      const done = (err) => { setTimeout(() => fr.remove(), 500); err ? fail(err) : ok(); };
+      const doc = fr.contentDocument;
+      doc.open();
+      doc.write(planDocument().replace('</style>', 'body{max-width:none;padding:16px 20px}.no-pdf{display:none}</style>'));
+      doc.close();
+      const sc = doc.createElement('script');
+      sc.src = PDF_LIB;
+      sc.onerror = () => done(new Error('PDF library could not load'));
+      sc.onload = async () => {
+        try {
+          const w = fr.contentWindow;
+          if (doc.fonts && doc.fonts.ready) await doc.fonts.ready;
+          // options are rebuilt inside the frame: the library only accepts arrays made there
+          const opts = w.JSON.parse(JSON.stringify({
+            margin: [10, 8, 12, 8], filename,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', foreignObjectRendering: true, scrollX: 0, scrollY: 0, windowWidth: 733 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['css', 'legacy'], avoid: ['.rot', 'tr', 'h3', 'li', '.note'] }
+          }));
+          await w.html2pdf().set(opts).from(doc.body).save();
+          done();
+        } catch (e) { done(e); }
+      };
+      doc.head.appendChild(sc);
+    });
+  }
+  function downloadBlob(blob, name) {
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `DAWRA-plan-${new Date().toISOString().slice(0, 10)}.html`;
+    a.href = URL.createObjectURL(blob); a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    const m = $('#dlMsg'); m.textContent = t('dl.done'); m.hidden = false; setTimeout(() => { m.hidden = true; }, 4000);
+  }
+  function dlMessage(key, err) {
+    const m = $('#dlMsg'); m.textContent = t(key); m.className = err ? 'err' : 'muted'; m.hidden = false;
+    clearTimeout(dlMessage.timer); dlMessage.timer = setTimeout(() => { m.hidden = true; }, 6000);
+  }
+  $('#downloadBtn').addEventListener('click', async () => {
+    if (!state.rec) return;
+    const btn = $('#downloadBtn'), day = new Date().toISOString().slice(0, 10);
+    btn.disabled = true; dlMessage('dl.working');
+    try {
+      await makePdf(`DAWRA-plan-${day}.pdf`);
+      dlMessage('dl.done');
+    } catch (e) {
+      console.warn('PDF report failed:', e);
+      // No internet for the PDF library: still give the farmer the full plan as a file they can print to PDF
+      downloadBlob(new Blob([planDocument()], { type: 'text/html;charset=utf-8' }), `DAWRA-plan-${day}.html`);
+      dlMessage('dl.fallback', true);
+    } finally { btn.disabled = false; }
   });
   $('#shareBtn').addEventListener('click', () => {
     if (!lastExplain) return;
