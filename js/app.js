@@ -710,6 +710,78 @@
     synth.speak(u);
   });
   $('#printBtn').addEventListener('click', () => window.print());
+
+  // ---------- download the full plan (one self-contained HTML file, printable to PDF) ----------
+  function planDocument() {
+    const p = state.user.profile, z = state.zone, { cl, farm } = ctxNow(), recs = allRecs();
+    const cur = activeRec().current, arrow = t('dir') === 'rtl' ? ' ← ' : ' → ';
+    const ctx = { cl, zone: state.zone, farm, ind: state.ind, source: state.source };
+    const ind = state.ind, levels = Object.values(ind).map(i => i.level), n = l => levels.filter(x => x === l).length;
+    const health = Math.round((n('green') * 100 + n('amber') * 50) / levels.length);
+    const sentence = { heat: 'heat.s', water: 'water.s', rain: 'rain.s', ground: 'ground.s', frost: 'frost.s', erosion: 'erosion.s' };
+    const order = { red: 0, amber: 1, green: 2 };
+    const indRows = Object.keys(ind).sort((a, b) => order[ind[a].level] - order[ind[b].level]).map(k => {
+      const it = ind[k], vars = { ...it.vars };
+      if (k === 'water') vars.dir = t(vars.dir === 'drier' ? 'water.drier' : 'water.wetter');
+      return `<tr><td>${IND_ICONS[k]} ${t('ind.' + k)}</td><td><span class="lv ${it.level}">${t('lvl.' + it.level)}</span></td><td>${fmt(sentence[k], vars)}<br><small>🛰️ ${it.src}${it.demo ? ' · ' + t('src.demo') : ''}</small></td></tr>`;
+    }).join('');
+    const mo = t('months'), calc = E.calendar(farm.current.main[2], farm.current.summer[2], cl, farm);
+    const calRow = `<table class="cal"><tr>${calc.map(c => `<th>${mo[c.m]}</th>`).join('')}</tr><tr>${calc.map(c => `<td class="${c.s}">${{ crop: '🌱', bare: '—', stress: '⚠️' }[c.s]}</td>`).join('')}</tr></table>
+      <p class="legend"><span class="crop">🌱 ${t('cal.crop')}</span> <span class="bare">— ${t('cal.bare')}</span> <span class="stress">⚠️ ${t('cal.stress')}</span></p>`;
+    const seq = r => r.rot.main.map((m, k) => `${CROPS[m].icon} ${cname(m)}${r.rot.summer[k] !== 'none' ? ' + ☀️ ' + cname(r.rot.summer[k]) : ''}`).join(arrow);
+    const conf = r => r.arch === 'current' || r.arch === 'custom' ? '' : t('conf.' + E.confidence(r, { source: state.source, zone: state.zone }));
+    const water = r => farm.water === 'rain' ? `${t('m.deficit')}: ${r.ev.deficitPct}%` : `${nf(r.ev.needYear)} m³/${t('ha')} · ${nf(Math.round(r.ev.needYear * farm.area))} m³`;
+    const cmpRows = recs.map((r, i) => `<tr class="${i === 1 ? 'best' : ''}"><td><b>${(i === 1 ? '⭐ ' : '') + recLabel(r)}</b><br>${seq(r)}</td><td>${water(r)}</td>
+      <td>${Math.round(r.ev.metrics.income)}</td><td>${Math.round(r.ev.metrics.soil)}</td><td>${Math.round(r.ev.metrics.forage)}</td><td>${Math.round(r.ev.risk)}</td>
+      <td><b>${Math.round(r.ev.total)}</b>/100${conf(r) ? '<br><small>' + conf(r) + '</small>' : ''}</td></tr>`).join('');
+    const list = (head, items) => items.length ? `<h4>${head}</h4><ul>${items.map(x => `<li>${x}</li>`).join('')}</ul>` : '';
+    const advice = recs.map((r, i) => {
+      const x = E.explain(r, cur, ctx, t, fmt, state.lang), labels = r.arch === 'current' ? HIST_SEASONS : NEXT_SEASONS;
+      return `<section class="rot"><h3>${(i === 1 ? '⭐ ' : '') + recLabel(r)} · ${t('m.score')} ${Math.round(r.ev.total)}/100</h3>
+        <table class="years"><tr>${r.rot.main.map((m, k) => `<td><b>${t('y')} ${k + 1} · ${labels[k]}</b><br><span class="big">${CROPS[m].icon}</span><br>${cname(m)}${r.rot.summer[k] !== 'none' ? `<br>☀️ ${cname(r.rot.summer[k])}` : ''}</td>`).join('')}</tr></table>
+        <p>💧 ${water(r)} · 🌱 ${t('m.soil')} ${Math.round(r.ev.metrics.soil)}/100 · ⚠️ ${t('m.risk')} ${Math.round(r.ev.risk)}/100</p>
+        ${list('💡 ' + t('det.why'), x.why)}${list('⚠️ ' + t('det.risks'), x.risks)}${list('🛰️ ' + t('det.evidence'), x.ev)}${list('🌿 ' + t('det.benefits'), x.ben)}${list('❓ ' + t('det.gaps'), x.gaps)}
+      </section>`;
+    }).join('');
+    const date = new Date().toLocaleDateString(loc(), { year: 'numeric', month: 'long', day: 'numeric' });
+    const css = `body{font-family:Cairo,'Segoe UI',Tahoma,Arial,sans-serif;max-width:900px;margin:0 auto;padding:24px;color:#2b2b2b;background:#fff;line-height:1.6}
+      h1{color:#2f6b3a;margin:0}h2{color:#2f6b3a;border-bottom:2px solid #2f6b3a;padding-bottom:4px;margin-top:32px}h3{margin:0 0 8px;color:#24502d}
+      header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:4px solid #2f6b3a;padding-bottom:12px}
+      .meta{color:#666}button{background:#2f6b3a;color:#fff;border:0;border-radius:8px;padding:10px 18px;font:inherit;cursor:pointer}
+      table{border-collapse:collapse;width:100%;margin:8px 0}td,th{border:1px solid #ddd;padding:6px 8px;vertical-align:top;text-align:start}th{background:#f2efe6}
+      dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px}dt{font-weight:bold;color:#555}dd{margin:0}
+      .lv{padding:2px 8px;border-radius:10px;color:#fff;white-space:nowrap}.lv.red{background:#c0392b}.lv.amber{background:#d68910}.lv.green{background:#2e8b57}
+      .cal td,.cal th{text-align:center;padding:4px 2px;font-size:12px}.cal td.crop{background:#cfe8c9}.cal td.bare{background:#ecdcbf}.cal td.stress{background:#f5b7b1}
+      .legend span{margin-inline-end:12px;font-size:13px}tr.best{background:#f3faf0}.rot{border:1px solid #ddd;border-radius:10px;padding:14px;margin:14px 0;page-break-inside:avoid}
+      .years td{text-align:center;width:33%}.big{font-size:28px}.note{background:#fff8e1;border-inline-start:4px solid #d68910;padding:8px 12px}
+      .gauge{font-size:20px}footer{margin-top:32px;color:#666;font-size:13px;border-top:1px solid #ddd;padding-top:12px}
+      @media print{button{display:none}body{padding:0}h2{page-break-after:avoid}}`;
+    return `<!DOCTYPE html><html lang="${state.lang}" dir="${t('dir')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>DAWRA — ${t('dl.title')}</title><style>${css}</style></head><body>
+      <header><div><h1>🌾 DAWRA دورة</h1><div>${t('dl.title')}</div><div class="meta">${t('dl.date')}: ${date} · 🛰️ ${t('src.' + state.source)}</div></div>
+        <button onclick="window.print()">📄 ${t('det.print')}</button></header>
+      ${state.simRec ? `<p class="note">${t('dl.sim')}</p>` : ''}
+      <h2>👤 ${t('tab.profile')}</h2><p>📍 ${p.place ? esc(p.place) + ' · ' : ''}${esc(z.name[state.lang])}</p>${summaryHTML(p)}
+      <h2>🛰️ ${t('health.title')}</h2><p class="gauge"><b>${health}/100</b> — ${t(health < 40 ? 'health.bad' : health < 70 ? 'health.mid' : 'health.good')}</p>
+      <h3>${t('dl.ind')}</h3><table>${indRows}</table>
+      <h3>${t('cal.title')}</h3>${calRow}
+      <h2>🔁 ${t('dl.cmp')}</h2>${renderPlan().replace(/class="card plan[^"]*"/, 'class="note"')}
+      <table><tr><th>${t('dl.rot')}</th><th>💧 ${t('m.water').split(' (')[0]}</th><th>💰 ${t('m.income')}</th><th>🌱 ${t('m.soil')}</th><th>🐄 ${t('m.forage')}</th><th>⚠️ ${t('m.risk')}</th><th>${t('m.score')}</th></tr>${cmpRows}</table>
+      <h2>💡 ${t('dl.advice')}</h2>${advice}
+      <p class="note">🤝 ${t('det.advisor')}</p>
+      <footer>${t('dl.footer')}<br>NASA POWER · SMAP · GPM IMERG · GRACE-FO · SRTM · Landsat / Sentinel-2 · NASA Space Apps 2026 · Beni Mellal</footer>
+      </body></html>`;
+  }
+  $('#downloadBtn').addEventListener('click', () => {
+    if (!state.rec) return;
+    const blob = new Blob([planDocument()], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `DAWRA-plan-${new Date().toISOString().slice(0, 10)}.html`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    const m = $('#dlMsg'); m.textContent = t('dl.done'); m.hidden = false; setTimeout(() => { m.hidden = true; }, 4000);
+  });
   $('#shareBtn').addEventListener('click', () => {
     if (!lastExplain) return;
     const { r, x } = lastExplain;
