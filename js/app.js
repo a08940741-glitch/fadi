@@ -11,17 +11,24 @@
   const TREE_ICONS = { olive: '🫒', almond: '🌰', citrus: '🍊', pomegranate: '🔴' };
   const WZ_STEPS = 5;
 
+  // Storage that never crashes: private browsing or a sandboxed frame can block localStorage.
+  // Then the farm is kept in memory for this visit only.
+  const store = (() => {
+    try { const ls = window.localStorage; ls.setItem('dawra.t', '1'); ls.removeItem('dawra.t'); return ls; }
+    catch (e) { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; }
+  })();
+
   // Escape every user-supplied string before it goes into HTML (XSS protection)
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const state = {
-    lang: localStorage.getItem('dawra.lang') || 'en',
+    lang: store.getItem('dawra.lang') || 'en',
     user: loadUser(), draft: null, wz: 0,
     zone: null, farm: null, climate: null, source: null, ind: null, rec: null, selected: 1,
     screen: 'home'
   };
   function loadUser() {
-    try { const p = JSON.parse(localStorage.getItem('dawra.profile')); return p ? { name: '', profile: p } : null; }
+    try { const p = JSON.parse(store.getItem('dawra.profile')); return p ? { name: '', profile: p } : null; }
     catch (e) { return null; }
   }
 
@@ -34,7 +41,7 @@
 
   function applyLang(lang) {
     state.lang = lang;
-    localStorage.setItem('dawra.lang', lang);
+    store.setItem('dawra.lang', lang);
     document.documentElement.lang = lang;
     document.documentElement.dir = t('dir');
     $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
@@ -77,7 +84,7 @@
 
   // ---------- saved account history ----------
   function clearSavedHistory() {
-    localStorage.removeItem('dawra.profile');
+    store.removeItem('dawra.profile');
     Object.assign(state, {
       user: null, draft: null, wz: 0, zone: null, farm: null,
       climate: null, source: null, ind: null, rec: null, selected: 1
@@ -195,7 +202,7 @@
     // save profile
     const p = { ...state.draft, area: parseFloat(state.draft.area), complete: true };
     p.updated = new Date().toISOString();
-    try { localStorage.setItem('dawra.profile', JSON.stringify(p)); } catch (e) { /* private mode: keep it for this visit only */ }
+    try { store.setItem('dawra.profile', JSON.stringify(p)); } catch (e) { /* private mode: keep it for this visit only */ }
     state.user = { name: '', profile: p };
     analyse();
   });
@@ -915,5 +922,5 @@
     // no sign-up: a new visitor lands straight on the farm questionnaire
     if (state.user && state.user.profile.complete) analyse(); else startWizard();
   })();
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  try { if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* blocked in sandboxed frames */ }
 })();
